@@ -1,0 +1,60 @@
+#!/usr/bin/with-contenv bash
+
+### Set Defaults
+ADMIN_PASS=${ADMIN_PASS:-"admin"}
+ENABLE_CLAMAV=${ENABLE_CLAMAV:-"TRUE"}
+ENABLE_MILTER=${ENABLE_MILTER:-"FALSE"}
+CLAMAV_HOST=${CLAMAV_HOST:-"clamav"}
+CLAMAV_PORT=${CLAMAV_PORT:-"3310"}
+REDIS_HOST=${REDIS_HOST:-"rspamd-redis"}
+REDIS_PORT=${REDIS_PORT:-"6379"}
+REDIS_TIMEOUT=${REDIS_TIMEOUT:-"15s"}
+REDIS_DB=${REDIS_DB:-"7"}
+LOG_LEVEL=${LOG_LEVEL:-"info"} # error,warning,info,debug
+
+
+### Set Password
+sed -i -e '/    password = /c\    password = ${ADMIN_PASS}' /etc/rspamd/local.d/rworker-controller.conf
+
+### Set Log Level
+echo 'level = "${LOG_LEVEL}";' > /etc/rspamd/local.d/logging.conf
+
+
+### Setup Redis
+[[ -n "$REDIS_PASS" ]] && $REDIS_PASS='password = "'$REDIS_PASS'";'
+cat <<EOF > /etc/rspamd/local.d/redis.conf
+redis {
+servers = "$REDIS_HOST:$REDIS_PORT";
+timeout = "$REDIS_TIMEOUT";
+db = "$REDIS_DB";
+$REDIS_PASS
+}
+EOF
+sed -i -e '/    servers =/c\  servers = "$REDIS_HOST:$REDIS_PORT";' /etc/rspamd/local.d/statistic.conf
+
+    
+### Enable Clam Antivirus Checks
+	  if [ "$ENABLE_CLAMAV" = "TRUE" ] || [ "$ENABLE_CLAMAV" = "true" ];  then
+		if [ ! -f /etc/rspamd/local.d/antivirus.conf ] ; then
+	       cp -R /assets/rspamd/antivirus.conf /etc/rspamd/local.d/antivirus.conf
+	    fi
+	    sed -i -e '/  servers = /c\  servers = "$CLAMAV_HOST:$CLAMAV_PORT";' /etc/rspamd/local.d/antivirus.conf
+	  fi  
+
+### Enable Miler
+	  if [ "$ENABLE_MILTER" = "TRUE" ] || [ "$ENABLE_MILTER" = "true" ];  then
+		if [ ! -f /etc/rspamd/worker-proxy.inc ] ; then
+	       cp -R /assets/rspamd/worker-proxy.inc /etc/rspamd/worker-proxy.inc
+	    fi
+	  fi 
+
+FEATURES_ENABLED=`set -o posix; set | sort | grep ENABLE | grep TRUE |sed -e 's/QUEUE_//g' | sed -e 's/=TRUE//g' | awk -vRS="" -vOFS=', ' '$1=$1' | tr A-Z a-z`
+echo '** [rspamd] Enabling the following features: '$FEATURES_ENABLED
+
+### Set Permissions
+mkdir -p /var/lib/rspamd
+chown -R rspamd:rspamd /var/lib/rspamd
+
+
+mkdir -p /tmp/state
+touch /tmp/state/10-rspamd-init
