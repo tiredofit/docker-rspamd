@@ -1,4 +1,5 @@
 bind_socket = "*:11334";
+password  = "admin"
 enable_password = "password";
 secure_ip = "192.168.0.0/16";
 secure_ip = "172.16.0.0/12";

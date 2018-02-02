@@ -2,8 +2,11 @@
 
 ### Set Defaults
 ADMIN_PASS=${ADMIN_PASS:-"admin"}
-ENABLE_CLAMAV=${ENABLE_CLAMAV:-"TRUE"}
-ENABLE_MILTER=${ENABLE_MILTER:-"FALSE"}
+PLUGIN_ASN=${PLUGIN_ASN:-"TRUE"}
+PLUGIN_CLAMAV=${PLUGIN_CLAMAV:-"TRUE"}
+PLUGIN_EMAILS=${PLUGIN_EMAILS:-"TRUE"}
+PLUGIN_GREYLISTING=${PLUGIN_GREYLISTING:-"TRUE"}
+PLUGIN_MILTER=${PLUGIN_MILTER:-"FALSE"}
 CLAMAV_HOST=${CLAMAV_HOST:-"clamav"}
 CLAMAV_PORT=${CLAMAV_PORT:-"3310"}
 REDIS_HOST=${REDIS_HOST:-"rspamd-redis"}
@@ -14,10 +17,10 @@ LOG_LEVEL=${LOG_LEVEL:-"info"} # error,warning,info,debug
 
 
 ### Set Password
-sed -i -e '/    password = /c\    password = ${ADMIN_PASS}' /etc/rspamd/local.d/rworker-controller.conf
+sed -i -e '/password  = /c\password  = "'${ADMIN_PASS}'";' /etc/rspamd/local.d/worker-controller.inc
 
 ### Set Log Level
-echo 'level = "${LOG_LEVEL}";' > /etc/rspamd/local.d/logging.conf
+sed -i -e '/level = /c\level = "'${LOG_LEVEL}'";' /etc/rspamd/local.d/logging.inc
 
 
 ### Setup Redis
@@ -30,25 +33,56 @@ db = "$REDIS_DB";
 $REDIS_PASS
 }
 EOF
-sed -i -e '/    servers =/c\  servers = "$REDIS_HOST:$REDIS_PORT";' /etc/rspamd/local.d/statistic.conf
 
-    
+sed -i -e '/servers = /c\servers = "'${REDIS_HOST}':'${REDIS_PORT}'";' /etc/rspamd/local.d/classifier-bayes.conf
+
+### Setup Redis History
+cat <<EOF > /etc/rspamd/local.d/history_redis.conf
+servers = "$REDIS_HOST:$REDIS_PORT"; # Redis server to store history
+key_prefix = "rs_history"; # Default key name
+nrows = 2000; # Default rows limit
+compress = true; # Use zstd compression when storing data in redis
+EOF
+
+### ASN Module
+	  if [ "$PLUGIN_ASN" = "TRUE" ] || [ "$PLUGIN_ASN" = "true" ];  then
+		if [ ! -f /etc/rspamd/local.d/asn.conf ] ; then
+	       cp -R /assets/rspamd/asn.conf /etc/rspamd/local.d/asn.conf
+	    fi
+	  fi  
+
 ### Enable Clam Antivirus Checks
-	  if [ "$ENABLE_CLAMAV" = "TRUE" ] || [ "$ENABLE_CLAMAV" = "true" ];  then
+	  if [ "$PLUGIN_CLAMAV" = "TRUE" ] || [ "$PLUGIN_CLAMAV" = "true" ];  then
 		if [ ! -f /etc/rspamd/local.d/antivirus.conf ] ; then
 	       cp -R /assets/rspamd/antivirus.conf /etc/rspamd/local.d/antivirus.conf
 	    fi
-	    sed -i -e '/  servers = /c\  servers = "$CLAMAV_HOST:$CLAMAV_PORT";' /etc/rspamd/local.d/antivirus.conf
+	    sed -i -e '/  servers = /c\  servers = "'${CLAMAV_HOST}':'${CLAMAV_PORT}'";' /etc/rspamd/local.d/antivirus.conf
 	  fi  
 
-### Enable Miler
-	  if [ "$ENABLE_MILTER" = "TRUE" ] || [ "$ENABLE_MILTER" = "true" ];  then
+### Emails Module
+	  if [ "$PLUGIN_EMAILS" = "TRUE" ] || [ "$PLUGIN_EMAILS" = "true" ];  then
+		if [ ! -f /etc/rspamd/local.d/emails.conf ] ; then
+	       cp -R /assets/rspamd/emails.conf /etc/rspamd/local.d/emails.conf
+	    fi
+	  fi  
+
+### Enable Greylisting
+	  if [ "$PLUGIN_GREYLISTING" = "TRUE" ] || [ "$PLUGIN_GREYLISTING" = "true" ];  then
+		if [ ! -f /etc/rspamd/local.d/greylist.conf ] ; then
+	       cp -R /assets/rspamd/greylist.conf /etc/rspamd/local.d/greylist.conf
+	    fi
+		sed -i -e '/servers = /c\servers = "'${REDIS_HOST}':'${REDIS_PORT}'";' /etc/rspamd/local.d/greylist.conf
+	    
+	  fi  
+
+### Enable Milter
+	  if [ "$PLUGIN_MILTER" = "TRUE" ] || [ "$PLUGIN_MILTER" = "true" ];  then
 		if [ ! -f /etc/rspamd/worker-proxy.inc ] ; then
 	       cp -R /assets/rspamd/worker-proxy.inc /etc/rspamd/worker-proxy.inc
 	    fi
 	  fi 
 
-FEATURES_ENABLED=`set -o posix; set | sort | grep ENABLE | grep TRUE |sed -e 's/QUEUE_//g' | sed -e 's/=TRUE//g' | awk -vRS="" -vOFS=', ' '$1=$1' | tr A-Z a-z`
+FEATURES_ENABLED=`set -o posix; set | sort | grep PLUGIN | grep TRUE |sed -e 's/PLUGIN_//g' | sed -e 's/=TRUE//g' | awk -vRS="" -vOFS=', ' '$1=$1' | tr A-Z a-z`
 echo '** [rspamd] Enabling the following features: '$FEATURES_ENABLED
 
 ### Set Permissions

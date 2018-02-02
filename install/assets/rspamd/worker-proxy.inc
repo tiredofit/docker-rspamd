@@ -1,13 +1,7 @@
-# Included from top-level .conf file
-
-type = "proxy";
-
-milter = yes; # Enable milter mode
-timeout = 120s; # Needed for Milter usually
-
-upstream "local" {
-  default = yes;
-  hosts = "localhost";
+bind_socket = "rspamd:9900";
+milter = true;
+upstream {
+  name = "localhost";
+  default = true;
+  hosts = "rspamd:11333"
 }
-
-count = 1; # Do not spawn too many processes of this type
