@@ -1,26 +1,40 @@
-FROM tiredofit/alpine:edge
+FROM tiredofit/alpine:3.12
 LABEL maintainer="Dave Conroy (dave at tiredofit dot ca)"
 
 ### Disable Features From Base Image
-   ENV ENABLE_SMTP=false
+ENV ENABLE_SMTP=false
 
 ### Install Dependencies
-   RUN echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories && \
-       apk update && \
-       apk add --no-cache \
-               ca-certificates \
+RUN set -x && \
+   apk update && \
+   apk upgrade && \
+   apk add -t .rspam-build-deps \
+               py3-pip \
+   apk add -t .rspam-run-deps \
+               python3 \
+               py3-pip \
                rspamd \
+               rspamd-client \
                rspamd-controller \
-               rsyslog && \
-
-       mkdir /run/rspamd && \
-
+               rspamd-fuzzy \
+               rspamd-proxy \
+               rspamd-utils \
+               rsyslog \
+               && \
+   \
+   pip3 install \
+               configparser \
+               inotify \
+               && \
+   \
+   mkdir /run/rspamd && \
+   \
 ### Cleanup
-       rm -rf /var/cache/apk/* /usr/src/*
-
-
-### Add Files
-   ADD install /
+   apk del .rpsam-build-deps && \
+   rm -rf /etc/logrotate.d /var/cache/apk/* /usr/src/*
 
 ### Networking Configuration
-   EXPOSE 11333 11334
+EXPOSE 11333 11334
+
+### Add Files
+ADD install /

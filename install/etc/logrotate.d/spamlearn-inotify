@@ -8,7 +8,6 @@
     dateext
     sharedscripts
     postrotate
-    s6-svc -h /var/run/s6/services/10-rspamd
+    s6-svc -h /var/run/s6/services/20-inotify-spamlearn
     endscript
 }
-

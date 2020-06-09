@@ -1,40 +1,44 @@
-version: '2'
-
+version: '3.7'
 services:
   
   rspamd-app:
-    image: tiredofit/rspamd
+    image: registry.selfdesign.org/docker/rspamd
     container_name: rspamd-app
     ports: 
     - 11333:11333
     - 11334:11334
     volumes:
-    - ./logs/rspamd:/var/log/rspamd
-    - ./conf:/var/lib/rspamd
+    - ./logs/rspamd:/logs/rspamd
+    - ./data/rspamd:/data/rspamd
     environment:
     - ZABBIX_HOSTNAME=rspamd-app
 
-    - ADMIN_PASS=password
+    - CONTROLLER_PASS=password
 
     - REDIS_HOST=rspamd-redis
     - CLAMAV_HOST=clamd
+    - CLAMAV_PORT=3310
     networks:
-      - proxy-tier
+    - internal
+    - services
     restart: always
 
   rspamd-redis:
     container_name: rspamd-redis
-    restart: always
-    image: tiredofit/redis
+    image: registry.selfdesign.org/docker/redis/5/:latest
     volumes:
-    - ./redis:/var/lib/redis:Z
+    - ./db/rspamd-redis:/var/lib/redis:Z
     environment:
     - ZABBIX_HOSTNAME=rspamd-redis
     networks:
-      - proxy-tier
+    - internal
+    - services
+    restart: always
+
 
 networks:
-  proxy-tier:
-    external:
-      name: nginx-proxy
+  internal:
+    external: false
+  services:
+    external: true
 

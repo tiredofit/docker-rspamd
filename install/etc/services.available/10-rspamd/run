@@ -1,0 +1,22 @@
+#!/usr/bin/with-contenv bash
+
+source /assets/functions/00-container
+prepare_service
+PROCESS_NAME="rspamd"
+
+check_container_initialized
+check_service_initialized init
+liftoff
+
+### Set Debug Mode
+if var_true $DEBUG_MODE ; then
+	DEBUG_ARG="--debug" 
+fi
+
+print_info "Starting rspamd"
+exec rspamd \
+             --user rspamd \
+             --group rspamd \
+             --no-fork \
+             $DEBUG_ARG \
+             DBDIR=${RSPAMD_DATA_LOCATION}

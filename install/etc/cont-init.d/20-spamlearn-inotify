@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bash
+
+source /assets/functions/00-container
+prepare_service
+PROCESS_NAME="spamlearn-inotify"
+
+sed -i "s#<CONFIG_FILE>#${SPAMLEARN_CONFIG_FILE}#g" /usr/sbin/inotify-spamlearn.py
+
+configure_spamlearn_logging
+create_spamlearn_configuration
+
+liftoff

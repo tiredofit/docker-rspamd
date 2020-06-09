@@ -1,0 +1,365 @@
+#!/usr/bin/with-contenv bash
+
+clam_ready() {
+    print_debug "Checking to see if ClamAV Host: ${CLAMAV_HOST} is accessible"
+    COUNTER=0
+    while ! (silent nc -z ${CLAMAV_HOST} ${CLAMAV_PORT}) ; do
+        sleep 5
+        let COUNTER+=5
+        print_warn "Clamav Host '${CLAMAV_HOST}' is not accessible, retrying.. ($COUNTER seconds so far)"
+    done
+}
+
+configure_antivirus() {
+	if var_true $ENABLE_ANTIVIRUS ; then
+		clam_ready
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		    print_notice "Configuring Antivirus (${ANTIVIRUS_TYPE}) Filtering"
+			
+			if [ -n "$CLAMAV_PORT" ] ; then
+				clamav_port=":${CLAMAV_PORT}"
+			fi
+
+			cat <<EOF > /etc/rspamd/local.d/antivirus.conf
+## Custom Generated Clam Antivirus Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+  ${ANTIVIRUS_TYPE} {
+	  action = "${ANVIRUS_ACTION}";
+	  scan_mime_parts = ${ANTIVIRUS_ATTACHMENTS_ONLY};
+	  max_size = ${ANTIVIRUS_MAX_SIZE};
+	  symbol = "CLAM_VIRUS";
+	  type = "${ANTIVIRUS_TYPE}";
+	  log_clean = ${ANTIVIRUS_LOG_CLEAN};
+	  servers = "${CLAMAV_HOST}${clamav_port}";
+	  patterns {
+	    JUST_EICAR = "^Eicar-Test-Signature$";
+	  }
+	  whitelist = "${CONFIG_PATH}${WHITELIST_ANTIVIRUS}";
+  }
+ 
+  .include(try=true,priority=5) "${DBDIR}/dynamic/antivirus.conf"
+  .include(try=true,priority=10) "$LOCAL_CONFDIR/override.d/antivirus.conf"
+EOF
+		fi
+	fi  
+}
+
+## Configure Bayesian
+configure_classifier_bayesian() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring Bayesian Filtering"
+		cat <<EOF > /etc/rspamd/local.d/classifier_bayes.conf
+## Custom Generated Classifier: Bayesian Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+backend = "redis";
+new_schema = ${BAYESIAN_NEW_SCHEMA}
+expire = ${BAYESIAN_EXPIRE};
+min_learns = ${BAYESIAN_MIN_LEARNS};
+store_tokens = ${BAYESIAN_STORE_TOKENS};
+signatures = ${BAYESIAN_SIGNATURES};
+ 
+# enable autolearn here if you want it:
+autolearn = ${BAYESIAN_AUTOLEARN};
+autolearn {
+  spam_threshold = ${BAYESIAN_AUTOLEARN_SPAM_THRESHOLD}; # When to learn spam (score >= threshold)
+  ham_threshold = ${BAYESIAN_AUTOLEARN_HAM_THRESHOLD}; # When to learn ham (score <= threshold)
+  check_balance = ${BAYESIAN_AUTOLEARN_CHECK_BALANCE}; # Check spam and ham balance
+  min_balance = ${BAYESIAN_AUTOLEARN_MIN_BALANCE};    # Keep diff for spam/ham learns for at least this value
+}
+EOF
+	fi
+}
+
+configure_controller() {
+	if var_true $ENABLE_CONTROLLER ; then
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    	print_notice "Configuring Controller"
+    		secure_ip_array=$(echo $CONTROLLER_SECURE_IPS | tr "," "\n")
+			for ip in $secure_ip_array
+			do
+    			secure_ip=${secure_ip}$(cat <<EOF
+secure_ip ${ip}
+
+EOF
+										)
+			done
+			cat <<EOF > /etc/rspamd/local.d/worker-controller.inc
+## Custom Generated Controller Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+bind_socket = "${CONTROLLER_LISTEN_IP}:${CONTROLLER_LISTEN_PORT}";
+count=${CONTROLLER_COUNT}
+enable_password = "${CONTROLLER_PASS}";
+${secure_ip}
+EOF
+		fi
+	fi
+}
+
+configure_data_dir() {
+	### Set Permissions
+	mkdir -p ${RSPAMD_DATA_LOCATION}
+	mkdir -p ${RSPAMD_DATA_LOCATION}/dynamic
+	chown -R rspamd:rspamd ${RSPAMD_DATA_LOCATION}
+	rm -rf /var/lib/rspamd
+	ln -sf ${RSPAMD_DATA_LOCATION} /var/lib/rspamd
+}
+
+configure_logging() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring Logging"
+
+		debug_log_array=$(echo ${LOG_DEBUG_MODULES} | tr "," "\n")
+		counter=1
+		for module in $debug_log_array
+		do
+			if [ "$counter" -gt "1" ]; then
+				comma=","
+			fi
+			debug_modules=${debug_modules}${comma}\"${module}\"
+			let counter+=1
+		done
+
+		if [ "${LOG_TYPE}" = "FILE" ] || [ "${LOG_TYPE}" = "file" ] ; then
+			mkdir -p ${LOG_LOCATION}
+			touch ${LOG_LOCATION}${LOG_FILE}
+			chown -R rspamd: ${LOG_LOCATION}${LOG_FILE}
+			sed -i "s#<LOG_LOCATION>#${LOG_LOCATION}#g" /etc/logrotate.d/rspamd
+			log_type="file"
+		else
+			log_type="console"
+		fi
+
+		cat <<EOF > /etc/rspamd/local.d/logging.inc
+## Custom Generated Logging Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+type = '${log_type}';
+filename = '${LOG_LOCATION}${LOG_FILE}';
+level = '${LOG_LEVEL}';
+color = ${LOG_CONSOLE_COLORIZE};
+log_usec = ${LOG_USEC}
+debug_modules = [${debug_modules}]
+EOF
+	fi
+}
+
+configure_milter() {
+	if var_true $ENABLE_MILTER ; then
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		    print_notice "Configuring Milter"
+			cat <<EOF > /etc/rspamd/local.d/milter_headers.conf
+## Custom Generated Milter Headers Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+authenticated_headers = ["authentication-results"];
+use = ["x-spamd-result","x-spam-level","x-spamd-bar", "my-x-spam-score","x-spam-status", "authentication-results"];
+ 
+# add X-Spam-Score header (like SA does)
+# Source: https://groups.google.com/forum/#!topic/rspamd/fEdbnG0J18I
+custom {
+   my-x-spam-score = <<EOD
+     return function(task, common_meta)
+       local sc = common_meta['metric_score'] or task:get_metric_score()
+       -- return no error
+       return nil,
+       -- header(s) to add
+       {['X-Spam-Score'] = string.format('%.2f', sc[1])},
+       -- header(s) to remove
+       {['X-Spam-Score'] = 1},
+       -- metadata to store
+       {}
+   end
+EOD;
+}
+EOF
+			cat <<EOF > /etc/rspamd/override.d/milter_headers.conf
+extended_spam_headers=${MILTER_EXTENDED_SPAM_HEADERS}
+EOF
+		fi
+	fi
+}
+
+configure_mx_check() {
+	if var_true $ENABLE_MX_CHECK ; then
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		    print_notice "Configuring MX Checking"
+			cat <<EOF > /etc/rspamd/local.d/mx_check.conf
+## Custom Generated MX Check Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+enabled = true;
+EOF
+		fi
+	fi
+}
+
+configure_redis() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring Redis"
+		[[ -n "$REDIS_PASS" ]] && $redis_pass='password = "'$REDIS_PASS'";'
+		cat <<EOF > /etc/rspamd/local.d/redis.conf
+## Custom Generated Redis Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+servers = "${REDIS_HOST}:${REDIS_PORT}";
+timeout = "${REDIS_TIMEOUT}";
+db = "${REDIS_DB}";
+${REDIS_PASS}
+EOF
+	fi
+}
+
+configure_phishing() {
+	if var_true $ENABLE_PHISHING_CHECK ; then
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		    print_notice "Configuring Phishing"
+			cat <<EOF > /etc/rspamd/local.d/phishing.conf
+## Custom Generated Phishing Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+openphish_enabled = ${PHISHING_ENABLE_OPENPHISH};
+phishtank_enabled = ${PHISHING_ENABLE_PHISHTANK};
+EOF
+		fi
+	fi
+}
+
+configure_rspamd_options() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring RSpamD Options"
+		cat <<EOF > /etc/rspamd/local.d/mx_check.conf
+## Custom Generated URL Tags Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+local_addrs = "${LOCAL_IPS}";
+EOF
+
+		cat <<EOF > /etc/rspamd/override.d/worker-normal.inc
+## Custom Generated URL Tags Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+bind_socket = "${WORKER_LISTEN_IP}:${WORKER_LISTEN_PORT}";
+
+EOF
+
+		if [ "${NAMESERVER}" != "127.0.0.1" ] ; then
+			nameserver_ready
+        	print_debug "Setting Custom Nameserver"
+			cat <<EOF > /etc/rspamd/local.d/options.inc
+dns {
+  nameserver = ["${NAMESERVER}"];
+}
+EOF
+		fi
+	fi
+}
+
+configure_spamtrap() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring Spamtrap"
+		cat <<EOF > /etc/rspamd/local.d/spamtrap.conf
+## Custom Generated Spamtrap Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+enabled = ${ENABLE_SPAMTRAP};
+action = \"${SPAMTRAP_ACTION}\";
+score = ${SPAMTRAP_SCORE};
+learn_fuzzy = ${SPAMTRAP_LEARN_FUZZY};
+learn_spam = ${SPAMTRAP_LEARN_SPAM};
+map = file://$LOCAL_CONFDIR/maps.d/spamtrap.map;
+EOF
+	fi
+}
+
+configure_url_reputation() {
+	if var_true $ENABLE_URL_REPUTATION ; then
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		    print_notice "Configuring URL Reputation Checking"
+			cat <<EOF > /etc/rspamd/local.d/url_reputation.conf
+## Custom Generated URL Reputation Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+enabled = true;
+EOF
+		fi
+	fi
+}
+
+configure_url_tags() {
+	if var_true $ENABLE_URL_TAGS ; then
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		    print_notice "Configuring URL Tags Checking"
+			cat <<EOF > /etc/rspamd/local.d/mx_check.conf
+## Custom Generated URL Tags Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+enabled = true;
+EOF
+		fi
+	fi
+}
+
+configure_worker_fuzzy() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+    	print_notice "Configuring Worker: Fuzzy"
+		fuzzy_ip_array=$(echo $WORKER_FUZZY_ALLOW_UPDATE_IPS | tr "," "\n")
+		counter=1
+		for ip in $fuzzy_ip_array
+		do
+			if [ "$counter" -gt "1" ]; then
+				comma=","
+			fi
+			fuzzy_ip=${fuzzy_ip}${comma}\"${ip}\"
+			let counter+=1
+    		done
+		cat <<EOF > /etc/rspamd/local.d/worker-fuzzy.inc
+## Custom Generated Worker Fuzzy Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+count = ${WORKER_FUZZY_COUNT};
+backend = "redis";
+expire = ${WORKER_FUZZY_EXPIRE};
+allow_update = ["127.0.0.1", "::1"];
+EOF
+	fi
+}
+
+configure_worker_proxy() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+    	print_notice "Configuring Worker: Proxy"
+		cat <<EOF > /etc/rspamd/local.d/worker-proxy.inc
+## Custom Generated Worker Proxy Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+bind_socket = "${WORKER_PROXY_LISTEN_IP}:${WORKER_PROXY_LISTEN_PORT}";
+timeout = ${WORKER_PROXY_TIMEOUT};
+spam_header = "${WORKER_PROXY_SPAM_HEADER}";
+
+EOF
+	fi
+}
+
+nameserver_ready() {
+    print_debug "Checking to see if Nameserver Host: ${NAMESERVER} is accessible"
+    COUNTER=0
+    while ! (silent nc -z ${NAMESERVER} 53) ; do
+        sleep 5
+        let COUNTER+=5
+        print_warn "Nameserver Host '${NAMESERVER}' is not accessible, retrying.. ($COUNTER seconds so far)"
+    done
+
+}
