@@ -12,7 +12,6 @@ RUN set -x && \
                py3-pip \
    apk add -t .rspam-run-deps \
                python3 \
-               py3-pip \
                rspamd \
                rspamd-client \
                rspamd-controller \

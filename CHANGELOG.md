@@ -1,7 +1,7 @@
-## 1.1.0 2020-06-09 <dave at tiredofit dot ca>
+## 1.0.5 2020-06-12 <dave at tiredofit dot ca>
 
    ### Added
-      - Update to support tiredofit/alpine 5.0.0 base image
+      - Refactor to support tiredofit/alpine base image changes
 
 
 ## 1.0.4 2020-06-07 <dave at tiredofit dot ca>
@@ -14,6 +14,8 @@
 
    ### Added
       - Add timestamps for inotify-spamlearn logging
+
+   ### Reverted
 
 
 ## 1.0.2 2020-06-06 <dave at tiredofit dot ca>
@@ -33,7 +35,7 @@
    ### Added
       - Reworked Entire Image
       - Dyanmic Loading
-      - Spamlearn Inotify Script Installed
+      - SPamlearn Inotify Script Installed
 
 
 ## 0.2 2017-09-20 Dave Conroy <dave at tiredofit dot ca>

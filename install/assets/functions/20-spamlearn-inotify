@@ -1,5 +1,16 @@
 #!/usr/bin/with-contenv bash
 
+### Set Defaults
+ENABLE_SPAMLEARN_INOTIFY=${ENABLE_SPAMLEARN_INOTIFY:-"TRUE"}
+LOG_LEVEL_SPAMLEARN=${LOG_LEVEL_SPAMLEARN:-"INFO"}
+LOG_SPAMLEARN_LOCATION=${LOG_SPAMLEARN_LOCATION:-"/logs/spamlearn/"}
+LOG_SPAMLEARN_FILE=${LOG_SPAMLEARN_FILE:-"spamlearn.log"}
+LOG_SPAMLEARN_TYPE=${LOG_SPAMLEARN_TYPE:-"FILE"}
+SPAMLEARN_CONFIG_FILE=${SPAMLEARN_CONFIG_FILE:-"/etc/inotify/spamlearn.cfg"}
+SPAMLEARN_DELETE_AFTER_PROCESSING=${SPAMLEARN_DELETE_AFTER_PROCESSING:-"TRUE"}
+SPAMLEARN_HAM_LOCATION=${SPAMLEARN_HAM_LOCATION:-"/data/spamlearn/ham"}
+SPAMLEARN_SPAM_LOCATION=${SPAMLEARN_SPAM_LOCATION:-"/data/spamlearn/spam"}
+
 configure_spamlearn_logging() {
 	if [ "${LOG_SPAMLEARN_TYPE}" = "FILE" ] || [ "${LOG_SPAMLEARN_TYPE}" = "file" ] ; then
 		mkdir -p ${LOG_SPAMLEARN_LOCATION}
@@ -11,7 +22,6 @@ configure_spamlearn_logging() {
 		log_type="console"
 	fi
 }
-
 create_spamlearn_configuration() {
 	if var_true $ENABLE_SPAMLEARN_INOTIFY ; then
 		mkdir -p ${SPAMLEARN_HAM_LOCATION}
