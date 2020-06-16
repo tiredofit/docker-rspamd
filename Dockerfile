@@ -10,6 +10,7 @@ RUN set -x && \
    apk upgrade && \
    apk add -t .rspam-build-deps \
                py3-pip \
+               && \
    apk add -t .rspam-run-deps \
                python3 \
                rspamd \
@@ -29,7 +30,7 @@ RUN set -x && \
    mkdir /run/rspamd && \
    \
 ### Cleanup
-   apk del .rpsam-build-deps && \
+   apk del .rspam-build-deps && \
    rm -rf /etc/logrotate.d /var/cache/apk/* /usr/src/*
 
 ### Networking Configuration

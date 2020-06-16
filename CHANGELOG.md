@@ -1,3 +1,9 @@
+## 1.0.6 2020-06-16 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Fix Dockerfile Build
+
+
 ## 1.0.5 2020-06-12 <dave at tiredofit dot ca>
 
    ### Added
