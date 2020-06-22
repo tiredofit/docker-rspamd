@@ -5,6 +5,7 @@ prepare_service
 PROCESS_NAME="rspamd"
 
 configure_antivirus
+configure_asn
 configure_classifier_bayesian
 configure_controller
 configure_data_dir

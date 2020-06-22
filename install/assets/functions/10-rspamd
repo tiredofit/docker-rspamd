@@ -56,6 +56,25 @@ EOF
 	fi  
 }
 
+configure_asn() {
+	if var_true $ENABLE_ASN ; then
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		    print_notice "Configuring ASN"	
+			cat <<EOF > /etc/rspamd/local.d/asn.conf
+## Custom Generated ASN Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+provider_type = "rspamd";
+provider_info {
+  ip4 = "asn.rspamd.com";
+  ip6 = "asn6.rspamd.com";
+}
+symbol = "ASN";
+EOF
+		fi
+	fi
+}
 ## Configure Bayesian
 configure_classifier_bayesian() {
 	if [ "$SETUP_TYPE" = "AUTO" ]; then
@@ -91,7 +110,9 @@ configure_controller() {
     		secure_ip_array=$(echo $CONTROLLER_SECURE_IPS | tr "," "\n")
 			for ip in $secure_ip_array
 			do
-    			secure_ip="${secure_ip}"$(cat <<EOF
+    			secure_ip="${secure_ip}
+    			"$(cat <<EOF
+
 secure_ip "${ip}";
 
 
@@ -199,6 +220,27 @@ selector = "${DKIM_SELECTOR}";
 
 ### Enable DKIM signing for alias sender addresses
 allow_username_mismatch = true;
+
+# If false, messages with empty envelope from are not signed
+allow_envfrom_empty = true;
+# If true, envelope/header domain mismatch is ignored
+allow_hdrfrom_mismatch = true;
+# If true, multiple from headers are allowed (but only first is used)
+allow_hdrfrom_multiple = true;
+# If true, username does not need to contain matching domain
+allow_username_mismatch = true;
+# If false, messages from authenticated users are not selected for signing
+auth_only = true;
+# If false, messages from local networks are not selected for signing
+sign_local = true;
+# Symbol to add when message is signed
+symbol = "DKIM_SIGNED";
+# Whether to fallback to global config
+try_fallback = true;
+# Whether to normalise domains to eSLD
+use_esld = false;
+# Whether to get keys from Redis
+use_redis = true;
 EOF
 
 			if var_true $ENABLE_ARC ; then
@@ -233,9 +275,9 @@ try_fallback = true;
 use_domain = "header";
 use_domain_sign_inbound = "recipient";
 # Whether to normalise domains to eSLD
-use_esld = true;
+use_esld = false;
 # Whether to get keys from Redis
-use_redis = false;
+use_redis = true;
 # Hash for ARC keys in Redis
 key_prefix = "ARC_KEYS";
 EOF
@@ -248,18 +290,12 @@ EOF
 configure_history() {
 	if [ "$SETUP_TYPE" = "AUTO" ]; then
 	    print_notice "Configuring Redis History"
-		[[ -n "$REDIS_PASS" ]] && $redis_pass='password = "'$REDIS_PASS'";'
 		cat <<EOF > /etc/rspamd/local.d/history_redis.conf
 ## Custom Generated Redis History Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
 
-servers = "${REDIS_HOST}:${REDIS_PORT}";
-timeout = "${REDIS_TIMEOUT}";
-db = "${REDIS_DB}";
-${REDIS_PASS}
-key_prefix = "rs_history";
-nrows = ${HISTORY_ROWS_LIMIT}; # Default rows limit
+nrows = ${HISTORY_ROWS_LIMIT};
 compress = ${HISTORY_COMPRESS};
 subject_privacy = ${HISTORY_SUBJECT_PRIVACY};
 
@@ -354,6 +390,12 @@ configure_mx_check() {
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
 enabled = true;
+timeout = 8.0;
+symbol_bad_mx = "MX_INVALID";
+symbol_no_mx = "MX_MISSING";
+symbol_good_mx = "MX_GOOD";
+expire = 86400;
+key_prefix = "rmx";
 EOF
 		fi
 	fi
@@ -517,15 +559,28 @@ EOF
 configure_worker_proxy() {
 	if [ "$SETUP_TYPE" = "AUTO" ]; then
     	print_notice "Configuring Worker: Proxy"
-		cat <<EOF > /etc/rspamd/local.d/worker-proxy.inc
+		#cat <<EOF > /etc/rspamd/local.d/worker-proxy.inc
+		cat <<EOF > /etc/rspamd/override.d/worker-proxy.inc
 ## Custom Generated Worker Proxy Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
 
 bind_socket = "${WORKER_PROXY_LISTEN_IP}:${WORKER_PROXY_LISTEN_PORT}";
 timeout = ${WORKER_PROXY_TIMEOUT};
+milter=true;
+upstream "local" {
+  name = "localhost";
+  default = true;
+  hosts = "localhost:11333"
+}
+reject_message = "This message does not meet our delivery requirements";
 spam_header = "${WORKER_PROXY_SPAM_HEADER}";
-
+count = 1; # Do not spawn too many processes of this type
+max_retries = 5; # How many times master is queried in case of failure
+discard_on_reject = false; # Discard message instead of rejection
+quarantine_on_reject = false; # Tell MTA to quarantine rejected messages
+spam_header = "X-Spam"; # Use the specific spam header
+reject_message = "Spam message rejected"; # Use custom rejection message
 EOF
 	fi
 }
