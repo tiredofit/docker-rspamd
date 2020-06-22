@@ -301,6 +301,8 @@ configure_phishing() {
 ## Last Generated on `date`
 
 openphish_enabled = ${PHISHING_ENABLE_OPENPHISH};
+openphish_map = "${PHISHING_OPENPHISH_FEED}";
+openphish_premium = ${PHISHING_OPENPHISH_PREMIUM};
 phishtank_enabled = ${PHISHING_ENABLE_PHISHTANK};
 EOF
 		fi
