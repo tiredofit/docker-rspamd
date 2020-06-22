@@ -124,10 +124,31 @@ configure_dmarc() {
 	if var_true $ENABLE_DMARC ; then
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 			print_debug "Configuring DMARC"
+			if var_true $DMARC_ENABLE_REPORTING ; then
+				if var_true $DMARC_SEND_REPORTS ; then
+	    			dmarc_report_settings=$(cat <<EOF
+send_reports = ${DMARC_SEND_REPORTS};
+report_settings {
+  org_name = "${DMARC_ORG_NAME}";
+  domain = "${DMARC_DOMAIN}";
+  email = "${DMARC_EMAIL}";
+  from_name = "${DMARC_FROM_NAME}";
+  smtp = "${DMARC_SMTP_HOST}";
+  smtp_port = ${DMARC_SMTP_PORT};
+  helo = "${DMARC_SMTP_HELO}";
+  retries = ${DMARC_SMTP_RETRIES};
+}
+EOF
+										)
+				fi
+			fi
+
 			cat <<EOF > /etc/rspamd/local.d/dmarc.conf
 ## Custom Generated DMARC Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
+reporting = ${DMARC_ENABLE_REPORTING};
+${dmarc_report_settings}
 EOF
 		fi
 	fi
@@ -153,12 +174,12 @@ Selector: ${DKIM_SELECTOR} generated on $(date)
 
 EOF
 	            else
-	            	DKIM_SELECTOR=${DKIM_SELECTOR:-"$(cat ${RSPAMD_DATA_LOCATION}/dkim/selectors | grep "Selector:" | awk '{print $2}')}"}
+	            	DKIM_SELECTOR=${DKIM_SELECTOR:-"$(cat ${RSPAMD_DATA_LOCATION}/dkim/selectors | grep "Selector:" | awk '{print $2}')"}
 	            fi
    		    fi
 
    		    if [ ! -f ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key ] ; then
-   		    	rspamadm dkim_keygen -b ${DKIM_KEY_SIZE} -s ${DKIM_SELECTOR} -k ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key > ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}-dns.txt
+   		    	sudo -u rspamd rspamadm dkim_keygen -b ${DKIM_KEY_SIZE} -s ${DKIM_SELECTOR} -k ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key > ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}-dns.txt
    		    	print_notice "***"
    		    	print_notice "DKIM: Key generated - You must add this entry to your Nameserver to complete the step"
    		    	cat ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}-dns.txt
@@ -180,7 +201,7 @@ allow_username_mismatch = true;
 EOF
 
 			if var_true $ENABLE_ARC ; then
-				print_notice "Configuring DKIM"
+				print_notice "Configuring ARC"
 				cat <<EOF > /etc/rspamd/local.d/arc.conf
 ## Custom Generated ARC Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
@@ -370,7 +391,7 @@ actions {
 	greylist = ${METRICS_GREYLIST};
 	reject = ${METRICS_REJECT};
 	rewrite_subject = ${METRICS_REWRITE_SUBJECT};
-	subject = ${REWRITE_SUBJECT};
+	subject = "${REWRITE_SUBJECT}";
 }
 
 EOF
