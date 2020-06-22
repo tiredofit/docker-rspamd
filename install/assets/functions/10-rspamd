@@ -36,7 +36,7 @@ configure_antivirus() {
 ## Last Generated on `date`
 
   ${ANTIVIRUS_TYPE} {
-	  action = "${ANVIRUS_ACTION}";
+	  action = "${ANTIVIRUS_ACTION}";
 	  scan_mime_parts = ${ANTIVIRUS_ATTACHMENTS_ONLY};
 	  max_size = ${ANTIVIRUS_MAX_SIZE};
 	  symbol = "CLAM_VIRUS";
