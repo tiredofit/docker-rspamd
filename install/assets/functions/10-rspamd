@@ -165,7 +165,7 @@ configure_dkim() {
 	    	if [ -z "$DKIM_SELECTOR" ] ; then
 	            if [ ! -f ${RSPAMD_DATA_LOCATION}/dkim/selectors ]; then
 	                print_debug "DKIM: Randomly generating DKIM selector name"
-	                DKIM_SELECTOR=${DKIM_SELECTOR:-"$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 8 | head -n 1)"}
+	                DKIM_SELECTOR=${DKIM_SELECTOR:-"$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 8 | head -n 1)"}
 	                cat <<EOF > ${RSPAMD_DATA_LOCATION}/dkim/selectors
 ## This is a list of selectors for DKIM Don't delete this file.
 ## Generated on $(date)
