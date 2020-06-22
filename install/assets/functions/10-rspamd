@@ -42,7 +42,6 @@ configure_antivirus() {
 	  symbol = "CLAM_VIRUS";
 	  type = "${ANTIVIRUS_TYPE}";
 	  log_clean = ${ANTIVIRUS_LOG_CLEAN};
-	  type=${ANTIVIRUS_TYPE}
 	  servers = "${CLAMAV_HOST}${clamav_port}";
 	  patterns {
 	    JUST_EICAR = "^Eicar-Test-Signature$";
@@ -92,8 +91,10 @@ configure_controller() {
     		secure_ip_array=$(echo $CONTROLLER_SECURE_IPS | tr "," "\n")
 			for ip in $secure_ip_array
 			do
-    			secure_ip=${secure_ip}$(cat <<EOF
-secure_ip ${ip}
+    			secure_ip="${secure_ip}"$(cat <<EOF
+secure_ip "${ip}";
+
+
 
 EOF
 										)
@@ -245,7 +246,6 @@ EOF
 }
 
 configure_history() {
-	configure_redis() {
 	if [ "$SETUP_TYPE" = "AUTO" ]; then
 	    print_notice "Configuring Redis History"
 		[[ -n "$REDIS_PASS" ]] && $redis_pass='password = "'$REDIS_PASS'";'
@@ -260,13 +260,14 @@ db = "${REDIS_DB}";
 ${REDIS_PASS}
 key_prefix = "rs_history";
 nrows = ${HISTORY_ROWS_LIMIT}; # Default rows limit
-compress = ${HISTORY_COMPRESSION};
+compress = ${HISTORY_COMPRESS};
 subject_privacy = ${HISTORY_SUBJECT_PRIVACY};
 
 EOF
 	fi
 
 }
+
 configure_logging() {
 	if [ "$SETUP_TYPE" = "AUTO" ]; then
 	    print_notice "Configuring Logging"
@@ -433,6 +434,8 @@ EOF
 			cat <<EOF > /etc/rspamd/local.d/options.inc
 dns {
   nameserver = ["${NAMESERVER}"];
+  timeout = 10s;
+
 }
 EOF
 		fi
@@ -448,7 +451,7 @@ configure_spamtrap() {
 ## Last Generated on `date`
 
 enabled = ${ENABLE_SPAMTRAP};
-action = \"${SPAMTRAP_ACTION}\";
+action = "${SPAMTRAP_ACTION}";
 score = ${SPAMTRAP_SCORE};
 learn_fuzzy = ${SPAMTRAP_LEARN_FUZZY};
 learn_spam = ${SPAMTRAP_LEARN_SPAM};

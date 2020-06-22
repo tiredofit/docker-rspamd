@@ -1,4 +1,4 @@
-<LOG_LOCATION>.log {
+<LOG_LOCATION>*.log {
     daily
     ifempty
     rotate 7
