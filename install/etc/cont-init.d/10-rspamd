@@ -8,6 +8,7 @@ configure_antivirus
 configure_classifier_bayesian
 configure_controller
 configure_data_dir
+configure_dkim
 configure_logging
 configure_milter
 configure_mx_check
