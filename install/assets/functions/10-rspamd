@@ -42,6 +42,7 @@ configure_antivirus() {
 	  symbol = "CLAM_VIRUS";
 	  type = "${ANTIVIRUS_TYPE}";
 	  log_clean = ${ANTIVIRUS_LOG_CLEAN};
+	  type=${ANTIVIRUS_TYPE}
 	  servers = "${CLAMAV_HOST}${clamav_port}";
 	  patterns {
 	    JUST_EICAR = "^Eicar-Test-Signature$";
@@ -326,9 +327,11 @@ EOF
 ## Last Generated on `date`
 
 actions {
-	reject = ${METRICS_REJECT};
 	add_header = ${METRICS_ADD_HEADER};
 	greylist = ${METRICS_GREYLIST};
+	reject = ${METRICS_REJECT};
+	rewrite_subject = ${METRICS_REWRITE_SUBJECT};
+	subject = ${REWRITE_SUBJECT};
 }
 
 EOF
