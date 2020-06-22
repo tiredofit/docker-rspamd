@@ -7,9 +7,7 @@ import logging
 import os
 import subprocess
 import threading
-
 import inotify.adapters
-
 
 
 def getconfig():

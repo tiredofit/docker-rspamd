@@ -254,15 +254,27 @@ configure_rspamd_options() {
 local_addrs = "${LOCAL_IPS}";
 EOF
 
+		cat <<EOF > /etc/rspamd/override.d/metrics.conf
+## Custom Generated Metrics Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+actions {
+	reject = ${METRICS_REJECT};
+	add_header = ${METRICS_ADD_HEADER};
+	greylist = ${METRICS_GREYLIST};
+}
+
+EOF
+
 		cat <<EOF > /etc/rspamd/override.d/worker-normal.inc
-## Custom Generated URL Tags Configuration! Do not edit, instead set ENV Vars
+## Custom Generated Worker Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
 
 bind_socket = "${WORKER_LISTEN_IP}:${WORKER_LISTEN_PORT}";
 
 EOF
-
 		if [ "${NAMESERVER}" != "127.0.0.1" ] ; then
 			nameserver_ready
         	print_debug "Setting Custom Nameserver"
