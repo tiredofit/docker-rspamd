@@ -120,6 +120,20 @@ configure_data_dir() {
 	ln -sf ${RSPAMD_DATA_LOCATION} /var/lib/rspamd
 }
 
+configure_dmarc() {
+	if var_true $ENABLE_DMARC ; then
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+			print_debug "Configuring DMARC"
+			cat <<EOF > /etc/rspamd/local.d/dmarc.conf
+## Custom Generated DMARC Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+EOF
+		fi
+	fi
+
+}
+
 configure_dkim() {
 	if var_true $ENABLE_DKIM ; then
 		mkdir -p ${RSPAMD_DATA_LOCATION}/dkim
@@ -166,8 +180,8 @@ allow_username_mismatch = true;
 EOF
 
 			if var_true $ENABLE_ARC ; then
-
-			cat <<EOF > /etc/rspamd/local.d/arc.conf
+				print_notice "Configuring DKIM"
+				cat <<EOF > /etc/rspamd/local.d/arc.conf
 ## Custom Generated ARC Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
