@@ -122,8 +122,8 @@ configure_data_dir() {
 
 configure_dkim() {
 	if var_true $ENABLE_DKIM ; then
-		mkdir -p ${RSPAMD_DATA_LOCATION}dkim
-		chown -R rspamd:rspamd ${RSPAMD_DATA_LOCATION}
+		mkdir -p ${RSPAMD_DATA_LOCATION}/dkim
+		chown -R rspamd:rspamd ${RSPAMD_DATA_LOCATION}/dkim
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 	    	print_notice "Configuring DKIM"
 
