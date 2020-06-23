@@ -463,8 +463,6 @@ train {
 
 ann_expire = ${NEURAL_ANN_EXPIRE}; # For how long ANN should be preserved in Redis
 EOF
-	fi
-
 	    cat <<EOF > /etc/rspamd/local.d/neural_group.conf
 ## Custom Generated MX Check Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
@@ -489,7 +487,7 @@ symbols = {
   }
 }
 EOF
-
+	fi
 }
 
 configure_oletools() {
@@ -637,10 +635,10 @@ SPF_FAIL_NO_DKIM {
   score = 10;
 }
 
-SPOOFED_UNAUTH {
-  expression = "!RSPAMD_HOST";
-  score = 5.0;
-}
+#SPOOFED_UNAUTH {
+#  expression = "!RSPAMD_HOST";
+#  score = 5.0;
+#}
 
 OLEFY_MACRO {
   expression = "OLETOOLS";
@@ -690,7 +688,7 @@ EOF
 ## Last Generated on `date`
 rule "local" {
     # Fuzzy storage server list
-    servers = "localhost:11445";
+    servers = "127.0.0.1:${WORKER_FUZZY_LISTEN_PORT}";
     # Default symbol for unknown flags
     symbol = "LOCAL_FUZZY_UNKNOWN";
     # Additional mime types to store/check
@@ -913,7 +911,6 @@ BULK_HEADER {
 }
 
 LOCAL_BL_ASN {
-  require_symbols = "!MAILCOW_WHITE";
   type = "asn";
   map = "${LOCAL_CONFDIR}/maps.d/bad_asn.map";
   score = 5;
@@ -1232,7 +1229,7 @@ timeout = ${WORKER_PROXY_TIMEOUT};
 upstream "local" {
   name = "localhost";
   default = true;
-  hosts = "localhost:11333"
+  hosts = "127.0.0.1:${WORKER_LISTEN_PORT}"
 }
 
 spam_header = "${WORKER_PROXY_SPAM_HEADER}";

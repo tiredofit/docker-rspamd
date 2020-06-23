@@ -36,7 +36,7 @@ RUN set -x && \
    rm -rf /etc/logrotate.d /var/cache/apk/* /usr/src/*
 
 ### Networking Configuration
-EXPOSE 11333 11334
+EXPOSE 11333 11334 11335
 
 ### Add Files
 ADD install /
