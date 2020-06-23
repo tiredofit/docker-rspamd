@@ -75,6 +75,7 @@ EOF
 		fi
 	fi
 }
+
 ## Configure Bayesian
 configure_classifier_bayesian() {
 	if [ "$SETUP_TYPE" = "AUTO" ]; then
@@ -217,29 +218,15 @@ EOF
 
 path = "${RSPAMD_DATA_LOCATION}/dkim/\$selector.key";
 selector = "${DKIM_SELECTOR}";
-
-### Enable DKIM signing for alias sender addresses
-allow_username_mismatch = true;
-
-# If false, messages with empty envelope from are not signed
-allow_envfrom_empty = true;
-# If true, envelope/header domain mismatch is ignored
-allow_hdrfrom_mismatch = true;
-# If true, multiple from headers are allowed (but only first is used)
-allow_hdrfrom_multiple = true;
-# If true, username does not need to contain matching domain
-allow_username_mismatch = true;
-# If false, messages from authenticated users are not selected for signing
-auth_only = true;
-# If false, messages from local networks are not selected for signing
-sign_local = true;
-# Symbol to add when message is signed
+allow_envfrom_empty = ${DKIM_ALLOW_ENVFROM_EMPTY};
+allow_hdrfrom_mismatch = ${DKIM_ALLOW_HDRFROM_MISMATCH};
+allow_hdrfrom_multiple = ${DKIM_ALLOW_HDRFROM_MULTIPLE};
+allow_username_mismatch = ${DKIM_ALLOW_USERNAME_MISMATCH};
+auth_only = ${DKIM_AUTH_ONLY};
+sign_local = ${DKIM_SIGN_LOCAL};
 symbol = "DKIM_SIGNED";
-# Whether to fallback to global config
-try_fallback = true;
-# Whether to normalise domains to eSLD
-use_esld = false;
-# Whether to get keys from Redis
+try_fallback = ${DKIM_TRY_FALLBACK};
+use_esld = ${DKIM_USE_ESLD};
 use_redis = true;
 EOF
 
@@ -253,36 +240,36 @@ EOF
 path = "${RSPAMD_DATA_LOCATION}/dkim/\$selector.key";
 selector = "${DKIM_SELECTOR}";
 
-# If false, messages with empty envelope from are not signed
-allow_envfrom_empty = true;
-# If true, envelope/header domain mismatch is ignored
-allow_hdrfrom_mismatch = true;
-# If true, multiple from headers are allowed (but only first is used)
-allow_hdrfrom_multiple = false;
-# If true, username does not need to contain matching domain
-allow_username_mismatch = false;
-# If false, messages from authenticated users are not selected for signing
-auth_only = true;
-# If false, messages from local networks are not selected for signing
-sign_local = true;
-#
-sign_inbound = true;
-# Symbol to add when message is signed
-symbol_signed = "ARC_SIGNED";
-# Whether to fallback to global config
-try_fallback = true;
-# Domain to use for ARC signing: can be "header" or "envelope"
-use_domain = "header";
-use_domain_sign_inbound = "recipient";
-# Whether to normalise domains to eSLD
-use_esld = false;
-# Whether to get keys from Redis
-use_redis = true;
-# Hash for ARC keys in Redis
+allow_envfrom_empty = ${ARC_ALLOW_ENVFROM_EMPTY};
+allow_hdrfrom_mismatch = ${ARC_ALLOW_HDRFROM_MISMATCH};
+allow_hdrfrom_multiple = ${ARC_ALLOW_HDRFROM_MULTIPLE};
+allow_username_mismatch = ${ARC_ALLOW_USERNAME_MISMATCH};
+auth_only = ${ARC_AUTH_ONLY};
 key_prefix = "ARC_KEYS";
+sign_inbound = ${ARC_SIGN_INBOUND};
+sign_local = ${ARC_SIGN_LOCAL};
+symbol = "ARC_SIGNED";
+try_fallback = ${ARC_TRY_FALLBACK};
+use_domain = "${ARC_USE_DOMAIN}";
+use_domain_sign_inbound = "${ARC_USE_DOMAIN_SIGN_INBOUND}";
+use_esld = ${ARC_USE_ESLD};
+use_redis = true;
 EOF
 			fi
 		fi
+
+	fi
+}
+
+configure_greylist() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring Greylist"
+		cat <<EOF > /etc/rspamd/local.d/greylist.conf
+## Custom Generated Redis History Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+enabled = ${ENABLE_GREYLIST};
+EOF
 
 	fi
 }
@@ -301,7 +288,6 @@ subject_privacy = ${HISTORY_SUBJECT_PRIVACY};
 
 EOF
 	fi
-
 }
 
 configure_logging() {
@@ -382,22 +368,38 @@ EOF
 }
 
 configure_mx_check() {
-	if var_true $ENABLE_MX_CHECK ; then
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
-		    print_notice "Configuring MX Checking"
-			cat <<EOF > /etc/rspamd/local.d/mx_check.conf
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring MX Checking"
+		cat <<EOF > /etc/rspamd/local.d/mx_check.conf
 ## Custom Generated MX Check Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
-enabled = true;
-timeout = 8.0;
+enabled = ${ENABLE_MX_CHECK};
+timeout = ${MX_CHECK_TIMEOUT};
 symbol_bad_mx = "MX_INVALID";
 symbol_no_mx = "MX_MISSING";
 symbol_good_mx = "MX_GOOD";
-expire = 86400;
+expire = ${MX_CHECK_EXPIRE};
 key_prefix = "rmx";
 EOF
-		fi
+	fi
+}
+
+configure_neural() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring Neural Training"
+	    cat <<EOF > /etc/rspamd/local.d/neural.conf
+enabled = ${ENABLE_NEURAL};
+
+train {
+  max_train = ${NEURAL_MAX_TRAIN}; # Number ham/spam samples needed to start train
+  max_usages = ${NEURAL_MAX_USAGES}; # Number of learn iterations while ANN data is valid was 20
+  learning_rate = ${NEURAL_LEARNING_RATE}; # Rate of learning
+  max_iterations = ${NEURAL_MAX_ITERATIONS}; # Maximum iterations of learning (better preciseness but also lower speed of learning)
+}
+
+ann_expire = ${NEURAL_ANN_EXPIRE}; # For how long ANN should be preserved in Redis
+EOF
 	fi
 }
 
@@ -419,18 +421,65 @@ EOF
 }
 
 configure_phishing() {
-	if var_true $ENABLE_PHISHING_CHECK ; then
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
-		    print_notice "Configuring Phishing"
-			cat <<EOF > /etc/rspamd/local.d/phishing.conf
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring Phishing"
+		cat <<EOF > /etc/rspamd/local.d/phishing.conf
 ## Custom Generated Phishing Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
 
 openphish_enabled = ${PHISHING_ENABLE_OPENPHISH};
-openphish_map = "${PHISHING_OPENPHISH_FEED}";
+openphish_map     = "${PHISHING_OPENPHISH_FEED}";
 openphish_premium = ${PHISHING_OPENPHISH_PREMIUM};
 phishtank_enabled = ${PHISHING_ENABLE_PHISHTANK};
+EOF
+	fi
+}
+
+configure_repuation() {
+	if var_true $ENABLE_REPUTATION ; then
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		    print_notice "Configuring Reputation"
+			cat <<EOF > /etc/rspamd/local.d/reputation.conf
+## Custom Generated Repuation Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+rules {
+  ip_reputation = {
+    selector "ip" {
+    }
+    backend "redis" {
+    }
+
+    symbol = "IP_REPUTATION";
+  }
+  spf_reputation =  {
+    selector "spf" {
+    }
+    backend "redis" {
+    }
+
+    symbol = "SPF_REPUTATION";
+  }
+  dkim_reputation =  {
+    selector "dkim" {
+    }
+    backend "redis" {
+    }
+
+    symbol = "DKIM_REPUTATION"; # Also adjusts scores for DKIM_ALLOW, DKIM_REJECT
+  }
+  generic_reputation =  {
+    selector "generic" {
+      selector = "ip"; # see https://rspamd.com/doc/configuration/selectors.html
+    }
+    backend "redis" {
+    }
+
+    symbol = "GENERIC_REPUTATION";
+  }
+}
 EOF
 		fi
 	fi
@@ -447,8 +496,8 @@ configure_rspamd_options() {
 local_addrs = "${LOCAL_IPS}";
 EOF
 
-		cat <<EOF > /etc/rspamd/override.d/metrics.conf
-## Custom Generated Metrics Configuration! Do not edit, instead set ENV Vars
+		cat <<EOF > /etc/rspamd/override.d/actions.conf
+## Custom Generated Actions Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
 
@@ -476,7 +525,7 @@ EOF
 			cat <<EOF > /etc/rspamd/local.d/options.inc
 dns {
   nameserver = ["${NAMESERVER}"];
-  timeout = 10s;
+  timeout = ${NAMESERVER_TIMEOUT};
 
 }
 EOF
@@ -503,30 +552,29 @@ EOF
 }
 
 configure_url_reputation() {
-	if var_true $ENABLE_URL_REPUTATION ; then
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
-		    print_notice "Configuring URL Reputation Checking"
-			cat <<EOF > /etc/rspamd/local.d/url_reputation.conf
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring URL Reputation Checking"
+		cat <<EOF > /etc/rspamd/local.d/url_reputation.conf
 ## Custom Generated URL Reputation Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
-enabled = true;
+
+enabled = ${ENABLE_URL_REPUTATION};
 EOF
-		fi
 	fi
+
 }
 
 configure_url_tags() {
-	if var_true $ENABLE_URL_TAGS ; then
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
-		    print_notice "Configuring URL Tags Checking"
-			cat <<EOF > /etc/rspamd/local.d/mx_check.conf
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring URL Tags Checking"
+		cat <<EOF > /etc/rspamd/local.d/mx_check.conf
 ## Custom Generated URL Tags Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
-enabled = true;
+
+enabled = ${ENABLE_URL_TAGS};
 EOF
-		fi
 	fi
 }
 
