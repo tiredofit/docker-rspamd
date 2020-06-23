@@ -655,6 +655,89 @@ SPOOFED_UNAUTH_POLICY_FAILURE {
 }
 EOF
 
+		cat <<EOF > /etc/rspamd/local.d/fuzzy_check.conf
+## Custom Generated Fuzzy Check Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+rule "local" {
+    # Fuzzy storage server list
+    servers = "localhost:11445";
+    # Default symbol for unknown flags
+    symbol = "LOCAL_FUZZY_UNKNOWN";
+    # Additional mime types to store/check
+    mime_types = ["application/*"];
+    # Hash weight threshold for all maps
+    max_score = 100.0;
+    # Whether we can learn this storage
+    read_only = no;
+    # Ignore unknown flags
+    skip_unknown = yes;
+    # Hash generation algorithm
+    algorithm = "mumhash";
+
+    # Map flags to symbols
+    fuzzy_map = {
+        LOCAL_FUZZY_DENIED {
+            max_score = 10.0;
+            flag = 11;
+        }
+        LOCAL_FUZZY_WHITE {
+            max_score = 5.0;
+            flag = 13;
+        }
+    }
+}
+
+rule "mailcow" {
+    # Fuzzy storage server list
+    servers = "fuzzy.mailcow.email:11445";
+    # Default symbol for unknown flags
+    symbol = "MAILCOW_FUZZY_UNKNOWN";
+    # Additional mime types to store/check
+    mime_types = ["application/*"];
+    # Hash weight threshold for all maps
+    max_score = 100.0;
+    # Whether we can learn this storage
+    read_only = yes;
+    # Ignore unknown flags
+    skip_unknown = yes;
+    # Hash generation algorithm
+    algorithm = "mumhash";
+
+    # Map flags to symbols
+    fuzzy_map = {
+        MAILCOW_FUZZY_DENIED {
+            max_score = 10.0;
+            flag = 11;
+        }
+    }
+}
+EOF
+
+		cat <<EOF > /etc/rspamd/local.d/fuzzy-group.conf
+## Custom Generated Fuzzy Group Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+symbols = {
+    "LOCAL_FUZZY_UNKNOWN" {
+        weight = 0.1;
+    }
+    "LOCAL_FUZZY_DENIED" {
+        weight = 15.0;
+    }
+    "MAILCOW_FUZZY_UNKNOWN" {
+        weight = 0.1;
+    }
+    "MAILCOW_FUZZY_DENIED" {
+        weight = 7.0;
+    }
+    "LOCAL_FUZZY_WHITE" {
+        weight = -10.0;
+    }
+}
+EOF
+
 		cat <<EOF > /etc/rspamd/local.d/force_actions.conf
 ## Custom Generated Force Actions Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
