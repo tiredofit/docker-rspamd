@@ -508,6 +508,8 @@ oletools {
   extended = ${OLETOOLS_BLOCK_ALL_MACROS};
 }
 EOF
+		fi
+	fi
 }
 
 configure_phishing() {
