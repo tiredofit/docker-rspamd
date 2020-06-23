@@ -28,6 +28,8 @@ RUN set -x && \
                && \
    \
    mkdir /run/rspamd && \
+   mkdir -p /assts/rspamd && \
+   mv /etc/rspamd/maps.d /assets/rspamd/ && \
    \
 ### Cleanup
    apk del .rspam-build-deps && \

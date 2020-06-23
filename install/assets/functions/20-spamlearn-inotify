@@ -11,6 +11,7 @@ configure_spamlearn_logging() {
 		log_type="console"
 	fi
 }
+
 create_spamlearn_configuration() {
 	if var_true $ENABLE_SPAMLEARN_INOTIFY ; then
 		mkdir -p ${SPAMLEARN_HAM_LOCATION}
