@@ -1,5 +1,15 @@
 #!/usr/bin/with-contenv bash
 
+clam_ready() {
+    print_debug "Checking to see if ClamAV Host: ${CLAMAV_HOST} is accessible"
+    COUNTER=0
+    while ! (silent nc -z ${CLAMAV_HOST} ${CLAMAV_PORT}) ; do
+        sleep 5
+        let COUNTER+=5
+        print_warn "Clamav Host '${CLAMAV_HOST}' is not accessible, retrying.. ($COUNTER seconds so far)"
+    done
+}
+
 nameserver_ready() {
     print_debug "Checking to see if Nameserver Host: ${NAMESERVER} is accessible"
     COUNTER=0
@@ -10,13 +20,14 @@ nameserver_ready() {
     done
 
 }
-clam_ready() {
-    print_debug "Checking to see if ClamAV Host: ${CLAMAV_HOST} is accessible"
+
+olefy_ready() {
+    print_debug "Checking to see if Olefy Host: ${OLETOOLS_HOST} is accessible"
     COUNTER=0
-    while ! (silent nc -z ${CLAMAV_HOST} ${CLAMAV_PORT}) ; do
+    while ! (silent nc -z ${OLETOOLS_HOST} ${OLETOOLS_PORT}) ; do
         sleep 5
         let COUNTER+=5
-        print_warn "Clamav Host '${CLAMAV_HOST}' is not accessible, retrying.. ($COUNTER seconds so far)"
+        print_warn "Olefy Host '${OLETOOLS_HOST}' is not accessible, retrying.. ($COUNTER seconds so far)"
     done
 }
 
@@ -481,21 +492,22 @@ EOF
 
 }
 
-configure_redis() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
-	    print_notice "Configuring Redis"
-		[[ -n "$REDIS_PASS" ]] && $redis_pass='password = "'$REDIS_PASS'";'
-		cat <<EOF > /etc/rspamd/local.d/redis.conf
-## Custom Generated Redis Configuration! Do not edit, instead set ENV Vars
+configure_oletools() {
+	if var_true $ENABLE_OLETOOLS ; then
+		olefy_ready
+		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		    print_notice "Configuring OLE Tools"
+			cat <<EOF > /etc/rspamd/local.d/external_services.conf
+## Custom Generated External Services Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
 
-servers = "${REDIS_HOST}:${REDIS_PORT}";
-timeout = "${REDIS_TIMEOUT}";
-db = "${REDIS_DB}";
-${REDIS_PASS}
+oletools {
+  servers = "${OLETOOLS_HOST}:${OLETOOLS_PORT}";
+  scan_mime_parts = ${OLETOOLS_SCAN_MIME};
+  extended = ${OLETOOLS_BLOCK_ALL_MACROS};
+}
 EOF
-	fi
 }
 
 configure_phishing() {
@@ -510,6 +522,23 @@ openphish_enabled = ${PHISHING_ENABLE_OPENPHISH};
 openphish_map     = "${PHISHING_OPENPHISH_FEED}";
 openphish_premium = ${PHISHING_OPENPHISH_PREMIUM};
 phishtank_enabled = ${PHISHING_ENABLE_PHISHTANK};
+EOF
+	fi
+}
+
+configure_redis() {
+	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	    print_notice "Configuring Redis"
+		[[ -n "$REDIS_PASS" ]] && $redis_pass='password = "'$REDIS_PASS'";'
+		cat <<EOF > /etc/rspamd/local.d/redis.conf
+## Custom Generated Redis Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on `date`
+
+servers = "${REDIS_HOST}:${REDIS_PORT}";
+timeout = "${REDIS_TIMEOUT}";
+db = "${REDIS_DB}";
+${REDIS_PASS}
 EOF
 	fi
 }
