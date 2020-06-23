@@ -12,13 +12,14 @@ configure_data_dir
 configure_dkim
 configure_dmarc
 configure_greylist
+configure_history
 configure_logging
 configure_milter
 configure_mx_check
 configure_neural
+configure_oletools
 configure_phishing
 configure_redis
-configure_history
 configure_reputation
 configure_rspamd_options
 configure_spamtrap

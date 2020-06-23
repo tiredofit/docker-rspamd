@@ -545,7 +545,7 @@ EOF
 	fi
 }
 
-configure_repuation() {
+configure_reputation() {
 	if var_true $ENABLE_REPUTATION ; then
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 		    print_notice "Configuring Reputation"
@@ -610,13 +610,11 @@ EOF
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on `date`
 
-actions {
-	add_header = ${METRICS_ADD_HEADER};
-	greylist = ${METRICS_GREYLIST};
-	reject = ${METRICS_REJECT};
-	rewrite_subject = ${METRICS_REWRITE_SUBJECT};
-	subject = "${REWRITE_SUBJECT}";
-}
+add_header = ${METRICS_ADD_HEADER};
+greylist = ${METRICS_GREYLIST};
+reject = ${METRICS_REJECT};
+rewrite_subject = ${METRICS_REWRITE_SUBJECT};
+subject = "${REWRITE_SUBJECT}";
 
 EOF
 
@@ -1117,7 +1115,7 @@ dns {
 EOF
 		fi
 		
-		echo "map_watch_interval = ${MAP_WATCH_INTERVAL}; >> /etc/rspamd/local.d/options.inc"
+		echo "map_watch_interval = ${MAP_WATCH_INTERVAL};" >> /etc/rspamd/local.d/options.inc
 	
 	fi
 }
