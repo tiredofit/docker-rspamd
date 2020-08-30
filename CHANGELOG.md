@@ -1,3 +1,9 @@
+## 1.0.7 2020-08-30 <dave at tiredofit dot ca>
+
+   ### Added
+      - Add MODE=AGENT for using spamlearn-inotify from remote system
+
+
 ## 1.0.6 2020-06-16 <dave at tiredofit dot ca>
 
    ### Changed

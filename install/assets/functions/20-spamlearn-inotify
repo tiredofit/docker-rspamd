@@ -27,16 +27,16 @@ create_spamlearn_configuration() {
 [paths]
 spam_dir = ${SPAMLEARN_SPAM_LOCATION}
 ham_dir = ${SPAMLEARN_HAM_LOCATION}
- 
+
 [spam]
-spamcmd = /usr/bin/rspamc -P ${CONTROLLER_PASS} learn_spam
-hamcmd = /usr/bin/rspamc -P ${CONTROLLER_PASS} learn_ham
- 
+spamcmd = /usr/bin/rspamc -h ${CONTROLLER_HOST}:${CONTROLLER_PORT} -P ${CONTROLLER_PASS} learn_spam
+hamcmd = /usr/bin/rspamc -h ${CONTROLLER_HOST}:${CONTROLLER_PORT} -P ${CONTROLLER_PASS} learn_ham
+
 [mode]
 delete = ${SPAMLEARN_DELETE_AFTER_PROCESSING}
 scan = True
 oneshot = False
- 
+
 [logging]
 loglevel = ${LOG_LEVEL_SPAMLEARN}
 logfile = ${LOG_SPAMLEARN_LOCATION}${LOG_SPAMLEARN_FILE}

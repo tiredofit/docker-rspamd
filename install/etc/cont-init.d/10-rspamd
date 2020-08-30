@@ -4,29 +4,33 @@ source /assets/functions/00-container
 prepare_service
 PROCESS_NAME="rspamd"
 
-configure_antivirus
-configure_asn
-configure_classifier_bayesian
-configure_controller
-configure_data_dir
-configure_dkim
-configure_dmarc
-configure_greylist
-configure_history
-configure_logging
-configure_milter
-configure_mx_check
-configure_neural
-configure_oletools
-configure_phishing
-configure_redis
-configure_reputation
-configure_rspamd_options
-configure_spamtrap
-configure_url_reputation
-configure_url_tags
-configure_worker_fuzzy
-configure_worker_proxy
-db_ready redis
-
+if [ "${MODE}" = "AIO" ] ;
+    configure_antivirus
+    configure_asn
+    configure_classifier_bayesian
+    configure_controller
+    configure_data_dir
+    configure_dkim
+    configure_dmarc
+    configure_greylist
+    configure_history
+    configure_logging
+    configure_milter
+    configure_mx_check
+    configure_neural
+    configure_oletools
+    configure_phishing
+    configure_redis
+    configure_reputation
+    configure_rspamd_options
+    configure_spamtrap
+    configure_url_reputation
+    configure_url_tags
+    configure_worker_fuzzy
+    configure_worker_proxy
+    db_ready redis
+else
+    print_info "Setting to Spam Notify AGENT mode"
+    service_stop 10-rspamd
+    rm -rf /etc/logrotate.d/rspamd
 liftoff
