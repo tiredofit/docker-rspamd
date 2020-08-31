@@ -36,7 +36,7 @@ configure_antivirus() {
 		clam_ready
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 		    print_notice "Configuring Antivirus (${ANTIVIRUS_TYPE}) Filtering"
-			
+
 			if [ -n "$CLAMAV_PORT" ] ; then
 				clamav_port=":${CLAMAV_PORT}"
 			fi
@@ -59,18 +59,18 @@ configure_antivirus() {
 	  }
 	  whitelist = "${CONFIG_PATH}${WHITELIST_ANTIVIRUS}";
   }
- 
+
   .include(try=true,priority=5) "${DBDIR}/dynamic/antivirus.conf"
   .include(try=true,priority=10) "$LOCAL_CONFDIR/override.d/antivirus.conf"
 EOF
 		fi
-	fi  
+	fi
 }
 
 configure_asn() {
 	if var_true $ENABLE_ASN ; then
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
-		    print_notice "Configuring ASN"	
+		    print_notice "Configuring ASN"
 			cat <<EOF > /etc/rspamd/local.d/asn.conf
 ## Custom Generated ASN Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
@@ -102,7 +102,7 @@ expire = ${BAYESIAN_EXPIRE};
 min_learns = ${BAYESIAN_MIN_LEARNS};
 store_tokens = ${BAYESIAN_STORE_TOKENS};
 signatures = ${BAYESIAN_SIGNATURES};
- 
+
 # enable autolearn here if you want it:
 autolearn = ${BAYESIAN_AUTOLEARN};
 autolearn {
@@ -142,7 +142,7 @@ enable_password = "${CONTROLLER_PASS}";
 ${secure_ip}
 
 .include(try=true; priority=10) "$CONFDIR/override.d/worker-controller-password.inc"
-.include(try=true; priority=20) "$CONFDIR/override.d/worker-controller.custom.inc" 
+.include(try=true; priority=20) "$CONFDIR/override.d/worker-controller.custom.inc"
 EOF
 		fi
 	fi
@@ -154,8 +154,8 @@ configure_data_dir() {
 	mkdir -p ${RSPAMD_DATA_LOCATION}/dynamic
     if [ ! -d ${RSPAMD_DATA_LOCATION}/maps.d ] ; then
         print_debug "Setting up Custom maps.d folder"
-    	mkdir -p ${RSPAMD_DATA_LOCATION}/maps.d 
-    	cp -R /assets/rspamd/maps.d/* ${RSPAMD_DATA_LOCATION}/maps.d 
+    	mkdir -p ${RSPAMD_DATA_LOCATION}/maps.d
+    	cp -R /assets/rspamd/maps.d/* ${RSPAMD_DATA_LOCATION}/maps.d
     fi
     ln -sf ${RSPAMD_DATA_LOCATION}/maps.d /etc/rspamd/maps.d
 	chown -R rspamd:rspamd ${RSPAMD_DATA_LOCATION}
@@ -331,6 +331,7 @@ configure_logging() {
 			chown -R rspamd: ${LOG_LOCATION}${LOG_FILE}
 			sed -i "s#<LOG_LOCATION>#${LOG_LOCATION}#g" /etc/logrotate.d/rspamd
 			log_argument="> ${LOG_LOCATION}/${LOG_FILE}"
+      log_type=file"
 		else
 			log_type="console"
 		fi
@@ -1111,9 +1112,9 @@ dns {
 }
 EOF
 		fi
-		
+
 		echo "map_watch_interval = ${MAP_WATCH_INTERVAL};" >> /etc/rspamd/local.d/options.inc
-	
+
 	fi
 }
 
@@ -1233,7 +1234,7 @@ upstream "local" {
 }
 
 spam_header = "${WORKER_PROXY_SPAM_HEADER}";
-count = ${WORKER_PROXY_COUNT}; 
+count = ${WORKER_PROXY_COUNT};
 max_retries = ${WORKER_PROXY_MAX_RETRY};
 discard_on_reject = ${WORKER_PROXY_REJECT_DISCARD}; # Discard message instead of rejection
 quarantine_on_reject = ${WORKER_PROXY_REJECT_QUARANTINE}; # Tell MTA to quarantine rejected messages

@@ -1,3 +1,9 @@
+## 1.0.8 2020-08-31 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Fix broken Log Type configuration writing
+
+
 ## 1.0.7 2020-08-30 <dave at tiredofit dot ca>
 
    ### Added
