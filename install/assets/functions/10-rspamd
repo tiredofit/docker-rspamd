@@ -331,7 +331,7 @@ configure_logging() {
 			chown -R rspamd: ${LOG_LOCATION}${LOG_FILE}
 			sed -i "s#<LOG_LOCATION>#${LOG_LOCATION}#g" /etc/logrotate.d/rspamd
 			log_argument="> ${LOG_LOCATION}/${LOG_FILE}"
-      log_type=file"
+      log_type="file"
 		else
 			log_type="console"
 		fi
