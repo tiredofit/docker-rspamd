@@ -1,3 +1,11 @@
+## 1.1.0 2020-10-05 <dave at tiredofit dot ca>
+
+   ### Added
+      - Switch to Alpine Edge
+      - Rspamd 2.6.0
+      - Add IP Whitelist by domain option
+
+
 ## 1.0.8 2020-08-31 <dave at tiredofit dot ca>
 
    ### Changed

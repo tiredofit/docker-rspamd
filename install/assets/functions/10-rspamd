@@ -1011,6 +1011,15 @@ BAZAR_ABUSE_CH {
   map = "https://bazaar.abuse.ch/export/txt/md5/recent/";
   score = 10.0;
 }
+
+WHITELIST_SENDER_DOMAIN {
+  type = "from";
+  filter = "email:domain";
+  map = "${LOCAL_CONFDIR}/maps.d/whitelist.sender.domain.map";
+  score = -10.0
+}
+
+
 EOF
 
 		cat <<EOF > /etc/rspamd/local.d/policies_group.conf
