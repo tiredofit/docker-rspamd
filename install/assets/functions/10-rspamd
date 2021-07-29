@@ -229,7 +229,7 @@ configure_dkim() {
               if [ ! -f "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key ] ; then
                 sudo -u rspamd rspamadm dkim_keygen -b "${DKIM_KEY_SIZE}" -s "${!dkim_selector}" -k "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key > "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
                 echo "Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
-                sed '1 s|^|local key = [[|' "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".redis
+                sed '1 s|^|local key = [[|' "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' > "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".redis
                 echo "redis.call('HMSET', 'DKIM_KEYS', '${!dkim_selector}.${!dkim_domain}', key)" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".redis
                 print_notice "***"
                 print_notice "DKIM: Key generated for '${!dkim_domain}' with selector '${!dkim_selector}' - You must add this entry to your Nameserver to complete the step"

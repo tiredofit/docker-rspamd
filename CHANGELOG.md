@@ -1,3 +1,9 @@
+## 1.3.1 2021-07-29 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Bugfix for Redis DKIM files being inserted into Redis DB
+
+
 ## 1.3.0 2021-07-28 <dave at tiredofit dot ca>
 
    ### Changed
