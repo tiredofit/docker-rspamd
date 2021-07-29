@@ -1,3 +1,9 @@
+## 1.3.0 2021-07-28 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Massive bugfix release fixed groups, filters, DKIM
+
+
 ## 1.2.0 2021-05-10 <dave at tiredofit dot ca>
 
    ### Added

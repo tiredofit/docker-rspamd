@@ -9,5 +9,5 @@ check_container_initialized
 check_service_initialized init
 liftoff
 
-print_info "Starting SPAM/HAM Monitor"
+print_start "Starting SPAM/HAM Monitor"
 python3 /usr/sbin/inotify-spamlearn.py

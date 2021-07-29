@@ -1,8 +1,8 @@
 FROM tiredofit/alpine:edge
-LABEL maintainer="Dave Conroy (dave at tiredofit dot ca)"
+LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ### Disable Features From Base Image
-ENV ENABLE_SMTP=false
+ENV CONTAINER_ENABLE_MESSAGING=false
 
 ### Install Dependencies
 RUN set -x && \
@@ -10,6 +10,7 @@ RUN set -x && \
    apk upgrade && \
    apk add -t .rspamd-build-deps \
                py3-pip \
+               redis \
                && \
    apk add -t .rspamd-run-deps \
                python3 \
@@ -28,8 +29,9 @@ RUN set -x && \
                && \
    \
    mkdir /run/rspamd && \
-   mkdir -p /assts/rspamd && \
+   mkdir -p /assets/rspamd && \
    mv /etc/rspamd/maps.d /assets/rspamd/ && \
+   mv /usr/bin/redis-cli /usr/sbin && \
    \
 ### Cleanup
    apk del .rspamd-build-deps && \

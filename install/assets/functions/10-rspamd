@@ -3,9 +3,9 @@
 clam_ready() {
     print_debug "Checking to see if ClamAV Host: ${CLAMAV_HOST} is accessible"
     COUNTER=0
-    while ! (silent nc -z ${CLAMAV_HOST} ${CLAMAV_PORT}) ; do
+    while ! (silent nc -z "${CLAMAV_HOST}" "${CLAMAV_PORT}") ; do
         sleep 5
-        let COUNTER+=5
+        (( COUNTER+=5 ))
         print_warn "Clamav Host '${CLAMAV_HOST}' is not accessible, retrying.. ($COUNTER seconds so far)"
     done
 }
@@ -13,9 +13,9 @@ clam_ready() {
 nameserver_ready() {
     print_debug "Checking to see if Nameserver Host: ${NAMESERVER} is accessible"
     COUNTER=0
-    while ! (silent nc -z ${NAMESERVER} 53) ; do
+    while ! (silent nc -z "${NAMESERVER}" 53) ; do
         sleep 5
-        let COUNTER+=5
+        (( COUNTER+=5 ))
         print_warn "Nameserver Host '${NAMESERVER}' is not accessible, retrying.. ($COUNTER seconds so far)"
     done
 
@@ -24,15 +24,15 @@ nameserver_ready() {
 olefy_ready() {
     print_debug "Checking to see if Olefy Host: ${OLETOOLS_HOST} is accessible"
     COUNTER=0
-    while ! (silent nc -z ${OLETOOLS_HOST} ${OLETOOLS_PORT}) ; do
+    while ! (silent nc -z "${OLETOOLS_HOST}" "${OLETOOLS_PORT}") ; do
         sleep 5
-        let COUNTER+=5
+        (( COUNTER+=5 ))
         print_warn "Olefy Host '${OLETOOLS_HOST}' is not accessible, retrying.. ($COUNTER seconds so far)"
     done
 }
 
 configure_antivirus() {
-	if var_true $ENABLE_ANTIVIRUS ; then
+	if var_true "${ENABLE_ANTIVIRUS}" ; then
 		clam_ready
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 		    print_notice "Configuring Antivirus (${ANTIVIRUS_TYPE}) Filtering"
@@ -44,15 +44,15 @@ configure_antivirus() {
 			cat <<EOF > /etc/rspamd/local.d/antivirus.conf
 ## Custom Generated Clam Antivirus Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
   ${ANTIVIRUS_TYPE} {
-	  action = "${ANTIVIRUS_ACTION}";
-	  scan_mime_parts = ${ANTIVIRUS_ATTACHMENTS_ONLY};
+	  action = "${ANTIVIRUS_ACTION,,}";
+	  scan_mime_parts = ${ANTIVIRUS_ATTACHMENTS_ONLY,,};
 	  max_size = ${ANTIVIRUS_MAX_SIZE};
 	  symbol = "CLAM_VIRUS";
 	  type = "${ANTIVIRUS_TYPE}";
-	  log_clean = ${ANTIVIRUS_LOG_CLEAN};
+	  log_clean = ${ANTIVIRUS_LOG_CLEAN,,};
 	  servers = "${CLAMAV_HOST}${clamav_port}";
 	  patterns {
 	    JUST_EICAR = "^Eicar-Test-Signature$";
@@ -68,13 +68,13 @@ EOF
 }
 
 configure_asn() {
-	if var_true $ENABLE_ASN ; then
+	if var_true "${ENABLE_ASN}" ; then
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 		    print_notice "Configuring ASN"
 			cat <<EOF > /etc/rspamd/local.d/asn.conf
 ## Custom Generated ASN Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 provider_type = "rspamd";
 provider_info {
@@ -94,7 +94,7 @@ configure_classifier_bayesian() {
 		cat <<EOF > /etc/rspamd/local.d/classifier_bayes.conf
 ## Custom Generated Classifier: Bayesian Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 backend = "redis";
 new_schema = ${BAYESIAN_NEW_SCHEMA}
@@ -116,10 +116,10 @@ EOF
 }
 
 configure_controller() {
-	if var_true $ENABLE_CONTROLLER ; then
+	if var_true "${ENABLE_CONTROLLER}" ; then
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 	    	print_notice "Configuring Controller"
-    		secure_ip_array=$(echo $CONTROLLER_SECURE_IPS | tr "," "\n")
+    		secure_ip_array=$(echo "$CONTROLLER_SECURE_IPS" | tr "," "\n")
 			for ip in $secure_ip_array
 			do
     			secure_ip="${secure_ip}
@@ -135,7 +135,7 @@ EOF
 			cat <<EOF > /etc/rspamd/override.d/worker-controller.inc
 ## Custom Generated Controller Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 bind_socket = "${CONTROLLER_LISTEN_IP}:${CONTROLLER_LISTEN_PORT}";
 count=${CONTROLLER_COUNT}
 enable_password = "${CONTROLLER_PASS}";
@@ -150,31 +150,31 @@ EOF
 
 configure_data_dir() {
 	### Set Permissions
-	mkdir -p ${RSPAMD_DATA_LOCATION}
-	mkdir -p ${RSPAMD_DATA_LOCATION}/dynamic
-    if [ ! -d ${RSPAMD_DATA_LOCATION}/maps.d ] ; then
+	mkdir -p "${RSPAMD_DATA_LOCATION}"
+	mkdir -p "${RSPAMD_DATA_LOCATION}"/dynamic
+    if [ ! -d "${RSPAMD_DATA_LOCATION}"/maps.d ] ; then
         print_debug "Setting up Custom maps.d folder"
-    	mkdir -p ${RSPAMD_DATA_LOCATION}/maps.d
-    	cp -R /assets/rspamd/maps.d/* ${RSPAMD_DATA_LOCATION}/maps.d
+    	mkdir -p "${RSPAMD_DATA_LOCATION}"/maps.d
+    	cp -R /assets/rspamd/maps.d/* "${RSPAMD_DATA_LOCATION}"/maps.d
     fi
-    ln -sf ${RSPAMD_DATA_LOCATION}/maps.d /etc/rspamd/maps.d
-	chown -R rspamd:rspamd ${RSPAMD_DATA_LOCATION}
+    ln -sf "${RSPAMD_DATA_LOCATION}"/maps.d /etc/rspamd/maps.d
+	chown -R rspamd:rspamd "${RSPAMD_DATA_LOCATION}"
 	rm -rf /var/lib/rspamd
-	ln -sf ${RSPAMD_DATA_LOCATION} /var/lib/rspamd
+	ln -sf "${RSPAMD_DATA_LOCATION}" /var/lib/rspamd
 }
 
 configure_dmarc() {
-	if var_true $ENABLE_DMARC ; then
+	if var_true "${ENABLE_DMARC}" ; then
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 			print_debug "Configuring DMARC"
-			if var_true $DMARC_ENABLE_REPORTING ; then
-				if var_true $DMARC_SEND_REPORTS ; then
+			if var_true "${DMARC_ENABLE_REPORTING}" ; then
+				if var_true "${DMARC_SEND_REPORTS}" ; then
 	    			dmarc_report_settings=$(cat <<EOF
-send_reports = ${DMARC_SEND_REPORTS};
+send_reports = ${DMARC_SEND_REPORTS,,};
 report_settings {
   org_name = "${DMARC_ORG_NAME}";
   domain = "${DMARC_DOMAIN}";
-  email = "${DMARC_EMAIL}";
+  email = "${DMARC_EMAIL,,}";
   from_name = "${DMARC_FROM_NAME}";
   smtp = "${DMARC_SMTP_HOST}";
   smtp_port = ${DMARC_SMTP_PORT};
@@ -189,8 +189,8 @@ EOF
 			cat <<EOF > /etc/rspamd/local.d/dmarc.conf
 ## Custom Generated DMARC Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
-reporting = ${DMARC_ENABLE_REPORTING};
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
+reporting = ${DMARC_ENABLE_REPORTING,,};
 ${dmarc_report_settings}
 EOF
 		fi
@@ -199,83 +199,110 @@ EOF
 }
 
 configure_dkim() {
-	if var_true $ENABLE_DKIM ; then
-		mkdir -p ${RSPAMD_DATA_LOCATION}/dkim
-		chown -R rspamd:rspamd ${RSPAMD_DATA_LOCATION}/dkim
+	if var_true "${ENABLE_DKIM}" ; then
+		mkdir -p "${RSPAMD_DATA_LOCATION}"/dkim
+		chown -R rspamd:rspamd "${RSPAMD_DATA_LOCATION}"/dkim
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 	    	print_notice "Configuring DKIM"
-
-	    	if [ -z "$DKIM_SELECTOR" ] ; then
-	            if [ ! -f ${RSPAMD_DATA_LOCATION}/dkim/selectors ]; then
-	                print_debug "DKIM: Randomly generating DKIM selector name"
-	                DKIM_SELECTOR=${DKIM_SELECTOR:-"$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 8 | head -n 1)"}
-	                cat <<EOF > ${RSPAMD_DATA_LOCATION}/dkim/selectors
-## This is a list of selectors for DKIM Don't delete this file.
-## Generated on $(date)
-
-Selector: ${DKIM_SELECTOR} generated on $(date)
-
-EOF
-	            else
-	            	DKIM_SELECTOR=${DKIM_SELECTOR:-"$(cat ${RSPAMD_DATA_LOCATION}/dkim/selectors | grep "Selector:" | awk '{print $2}')"}
-	            fi
-   		    fi
-
-   		    if [ ! -f ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key ] ; then
-   		    	sudo -u rspamd rspamadm dkim_keygen -b ${DKIM_KEY_SIZE} -s ${DKIM_SELECTOR} -k ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key > ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}-dns.txt
-   		    	print_notice "***"
+   		    if [ ! -f "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".key ] ; then
+   		    	sudo -u rspamd rspamadm dkim_keygen -b "${DKIM_KEY_SIZE}" -s "${DKIM_SELECTOR}" -k "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".key > "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}"-dns.txt
+   		    	echo "Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}"-dns.txt
+            sed '1 s|^|local key = [[|' ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' > "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".redis
+            echo "redis.call('HMSET', 'DKIM_KEYS', '$DKIM_SELECTOR', key)" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".redis
+            print_notice "***"
    		    	print_notice "DKIM: Key generated - You must add this entry to your Nameserver to complete the step"
-   		    	cat ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}-dns.txt
+   		    	cat "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}"-dns.txt
    		    	print_notice "It can also be found at ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}-dns.txt"
    		    	print_notice "***"
-   		    	chmod 440 ${RSPAMD_DATA_LOCATION}/dkim/*
+   		    	chmod 440 "${RSPAMD_DATA_LOCATION}"/dkim/*
    		    fi
+
+          NUM=$(printenv | sort | grep -c '^DKIM.*_DOMAIN')
+          for (( i = 1; i <= NUM; i++ ))
+          do
+
+            dkim_domain=DKIM${i}_DOMAIN
+            dkim_selector=DKIM${i}_SELECTOR
+
+            if [ "${!dkim_domain}" != "" ] ; then
+
+              if [ ! -f "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key ] ; then
+                sudo -u rspamd rspamadm dkim_keygen -b "${DKIM_KEY_SIZE}" -s "${!dkim_selector}" -k "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key > "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
+                echo "Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
+                sed '1 s|^|local key = [[|' "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".redis
+                echo "redis.call('HMSET', 'DKIM_KEYS', '${!dkim_selector}.${!dkim_domain}', key)" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".redis
+                print_notice "***"
+                print_notice "DKIM: Key generated for '${!dkim_domain}' with selector '${!dkim_selector}' - You must add this entry to your Nameserver to complete the step"
+                cat "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
+                print_notice "It can also be found at '${RSPAMD_DATA_LOCATION}/dkim/${!dkim_domain}-${!dkim_selector}.dns.txt'"
+                print_notice "***"
+                chmod 440 "${RSPAMD_DATA_LOCATION}"/dkim/*
+              fi
+              dkim_domains=$(echo "${dkim_domains}" ; cat<<EOF
+domain { ${!dkim_domain} { path = "${RSPAMD_DATA_LOCATION}/dkim/${!dkim_domain}-${!dkim_selector}.key"; selector = "${!dkim_selector}"; }}
+EOF
+              )
+            fi
+          done
+
 
 			cat <<EOF > /etc/rspamd/local.d/dkim_signing.conf
 ## Custom Generated DKIM Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-path = "${RSPAMD_DATA_LOCATION}/dkim/\$selector.key";
-selector = "${DKIM_SELECTOR}";
-allow_envfrom_empty = ${DKIM_ALLOW_ENVFROM_EMPTY};
-allow_hdrfrom_mismatch = ${DKIM_ALLOW_HDRFROM_MISMATCH};
-allow_hdrfrom_multiple = ${DKIM_ALLOW_HDRFROM_MULTIPLE};
-allow_username_mismatch = ${DKIM_ALLOW_USERNAME_MISMATCH};
-auth_only = ${DKIM_AUTH_ONLY};
-sign_local = ${DKIM_SIGN_LOCAL};
+path = ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key;
+selector = ${DKIM_SELECTOR};
+allow_envfrom_empty = ${DKIM_ALLOW_ENVFROM_EMPTY,,};
+allow_hdrfrom_mismatch = ${DKIM_ALLOW_HDRFROM_MISMATCH,,};
+allow_hdrfrom_multiple = ${DKIM_ALLOW_HDRFROM_MULTIPLE,,};
+allow_username_mismatch = ${DKIM_ALLOW_USERNAME_MISMATCH,,};
+sign_local = ${DKIM_SIGN_LOCAL,,};
+sign_authenticated = ${DKIM_SIGN_AUTH,,};
 symbol = "DKIM_SIGNED";
-try_fallback = ${DKIM_TRY_FALLBACK};
-use_esld = ${DKIM_USE_ESLD};
-use_redis = true;
+try_fallback = ${DKIM_TRY_FALLBACK,,};
+use_esld = ${DKIM_USE_ESLD,,};
+use_redis = false;
+key_prefix = "DKIM_KEYS";
+sign_headers = "from:sender:reply-to:subject:date:message-id:to:cc:mime-version:content-type:content-transfer-encoding:content-language:resent-to:resent-cc:resent-from:resent-sender:resent-message-id:in-reply-to:references:list-id:list-help:list-owner:list-unsubscribe:list-subscribe:list-post:list-unsubscribe-post:disposition-notification-to:disposition-notification-options:original-recipient:openpgp:autocrypt";
+${dkim_domains}
 EOF
 
-			if var_true $ENABLE_ARC ; then
+			if var_true "${ENABLE_ARC}" ; then
 				print_notice "Configuring ARC"
 				cat <<EOF > /etc/rspamd/local.d/arc.conf
 ## Custom Generated ARC Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-path = "${RSPAMD_DATA_LOCATION}/dkim/\$selector.key";
-selector = "${DKIM_SELECTOR}";
-
-allow_envfrom_empty = ${ARC_ALLOW_ENVFROM_EMPTY};
-allow_hdrfrom_mismatch = ${ARC_ALLOW_HDRFROM_MISMATCH};
-allow_hdrfrom_multiple = ${ARC_ALLOW_HDRFROM_MULTIPLE};
-allow_username_mismatch = ${ARC_ALLOW_USERNAME_MISMATCH};
-auth_only = ${ARC_AUTH_ONLY};
-key_prefix = "ARC_KEYS";
-sign_inbound = ${ARC_SIGN_INBOUND};
-sign_local = ${ARC_SIGN_LOCAL};
+path = ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key;
+selector = ${DKIM_SELECTOR};
+allow_envfrom_empty = ${ARC_ALLOW_ENVFROM_EMPTY,,};
+allow_hdrfrom_mismatch = ${ARC_ALLOW_HDRFROM_MISMATCH,,};
+allow_hdrfrom_multiple = ${ARC_ALLOW_HDRFROM_MULTIPLE,,};
+allow_username_mismatch = ${ARC_ALLOW_USERNAME_MISMATCH,,};
+auth_only = ${ARC_AUTH_ONLY,,};
+key_prefix = "DKIM_KEYS";
+sign_inbound = ${ARC_SIGN_INBOUND,,};
+sign_local = ${ARC_SIGN_LOCAL,,};
 symbol = "ARC_SIGNED";
-try_fallback = ${ARC_TRY_FALLBACK};
-use_domain = "${ARC_USE_DOMAIN}";
-use_domain_sign_inbound = "${ARC_USE_DOMAIN_SIGN_INBOUND}";
-use_esld = ${ARC_USE_ESLD};
-use_redis = true;
+try_fallback = ${ARC_TRY_FALLBACK,,};
+use_domain = "${ARC_USE_DOMAIN,,}";
+use_domain_sign_inbound = "${ARC_USE_DOMAIN_SIGN_INBOUND,,}";
+use_esld = ${ARC_USE_ESLD,,};
+use_redis = false;
+${dkim_domains}
 EOF
 			fi
+      if [ -n "${REDIS_PASS}" ]; then redispassarg="--pass ${REDIS_PASS}" ; fi ;
+
+      silent redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${REDIS_DB} ${redispassarg} DEL DKIM_KEYS
+
+      for redis_dkim_script in "${RSPAMD_DATA_LOCATION}"/dkim/*.redis ; do
+                print_debug "Redis DKIM Script executing: '${redis_dkim_script}'"
+                silent redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${REDIS_DB} ${redispassarg} --eval ${redis_dkim_script}
+      done
+
 		fi
 
 	fi
@@ -287,8 +314,8 @@ configure_greylist() {
 		cat <<EOF > /etc/rspamd/local.d/greylist.conf
 ## Custom Generated Redis History Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
-enabled = ${ENABLE_GREYLIST};
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
+enabled = ${ENABLE_GREYLIST,,};
 EOF
 
 	fi
@@ -300,11 +327,11 @@ configure_history() {
 		cat <<EOF > /etc/rspamd/local.d/history_redis.conf
 ## Custom Generated Redis History Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 nrows = ${HISTORY_ROWS_LIMIT};
-compress = ${HISTORY_COMPRESS};
-subject_privacy = ${HISTORY_SUBJECT_PRIVACY};
+compress = ${HISTORY_COMPRESS,,};
+subject_privacy = ${HISTORY_SUBJECT_PRIVACY,,};
 
 EOF
 	fi
@@ -314,7 +341,7 @@ configure_logging() {
 	if [ "$SETUP_TYPE" = "AUTO" ]; then
 	    print_notice "Configuring Logging"
 
-		debug_log_array=$(echo ${LOG_DEBUG_MODULES} | tr "," "\n")
+		debug_log_array=$(echo "${LOG_DEBUG_MODULES}" | tr "," "\n")
 		counter=1
 		for module in $debug_log_array
 		do
@@ -322,13 +349,13 @@ configure_logging() {
 				comma=","
 			fi
 			debug_modules=${debug_modules}${comma}\"${module}\"
-			let counter+=1
+			(( counter+=1 ))
 		done
 
 		if [ "${LOG_TYPE}" = "FILE" ] || [ "${LOG_TYPE}" = "file" ] ; then
-			mkdir -p ${LOG_LOCATION}
-			touch ${LOG_LOCATION}${LOG_FILE}
-			chown -R rspamd: ${LOG_LOCATION}${LOG_FILE}
+			mkdir -p "${LOG_LOCATION}"
+			touch "${LOG_LOCATION}""${LOG_FILE}"
+			chown -R rspamd: "${LOG_LOCATION}""${LOG_FILE}"
 			sed -i "s#<LOG_LOCATION>#${LOG_LOCATION}#g" /etc/logrotate.d/rspamd
 			log_argument="> ${LOG_LOCATION}/${LOG_FILE}"
       log_type="file"
@@ -339,30 +366,32 @@ configure_logging() {
 		cat <<EOF > /etc/rspamd/local.d/logging.inc
 ## Custom Generated Logging Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-type = '${log_type}';
+type = ${log_type,,};
 filename = '${LOG_LOCATION}${LOG_FILE}';
-level = '${LOG_LEVEL}';
-color = ${LOG_CONSOLE_COLORIZE};
-log_usec = ${LOG_USEC}
-debug_modules = [${debug_modules}]
+level = ${LOG_LEVEL};
+color = ${LOG_CONSOLE_COLORIZE,,};
+log_usec = ${LOG_USEC,,};
+log_severity ${LOG_SEVERITY,,};
+debug_modules = [${debug_modules}];
 EOF
+
 	fi
 }
 
 configure_milter() {
-	if var_true $ENABLE_MILTER ; then
+	if var_true "${ENABLE_MILTER}" ; then
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 		    print_notice "Configuring Milter"
 			cat <<EOF > /etc/rspamd/local.d/milter_headers.conf
 ## Custom Generated Milter Headers Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-use = ["spam-header", "x-spamd-result", "x-rspamd-queue-id", "x-spam-level", "my-x-spam-score", "x-spam-status","authentication-results", "fuzzy-hashes"];
+use = ["x-spamd-result", "x-rspamd-queue-id", "x-spam-level", "my-x-spam-score", "x-spam-status","authentication-results", "fuzzy-hashes"];
 skip_local = false;
-skip_authenticated = true;
+skip_authenticated = false;
 custom {
    my-x-spam-score = <<EOD
      return function(task, common_meta)
@@ -420,7 +449,7 @@ routines {
 }
 EOF
 			cat <<EOF > /etc/rspamd/override.d/milter_headers.conf
-extended_spam_headers=${MILTER_EXTENDED_SPAM_HEADERS}
+extended_spam_headers=${MILTER_EXTENDED_SPAM_HEADERS,,};
 EOF
 		fi
 	fi
@@ -432,9 +461,9 @@ configure_mx_check() {
 		cat <<EOF > /etc/rspamd/local.d/mx_check.conf
 ## Custom Generated MX Check Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-enabled = ${ENABLE_MX_CHECK};
+enabled = ${ENABLE_MX_CHECK,,};
 timeout = ${MX_CHECK_TIMEOUT};
 symbol_bad_mx = "MX_INVALID";
 symbol_no_mx = "MX_MISSING";
@@ -451,9 +480,9 @@ configure_neural() {
 	    cat <<EOF > /etc/rspamd/local.d/neural.conf
 ## Custom Generated MX Check Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-enabled = ${ENABLE_NEURAL};
+enabled = ${ENABLE_NEURAL,,};
 
 train {
   max_train = ${NEURAL_MAX_TRAIN}; # Number ham/spam samples needed to start train
@@ -467,7 +496,7 @@ EOF
 	    cat <<EOF > /etc/rspamd/local.d/neural_group.conf
 ## Custom Generated MX Check Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 symbols = {
   "NEURAL_SPAM_LONG" {
@@ -492,19 +521,19 @@ EOF
 }
 
 configure_oletools() {
-	if var_true $ENABLE_OLETOOLS ; then
+	if var_true "${ENABLE_OLETOOLS}" ; then
 		olefy_ready
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 		    print_notice "Configuring OLE Tools"
 			cat <<EOF > /etc/rspamd/local.d/external_services.conf
 ## Custom Generated External Services Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 oletools {
   servers = "${OLETOOLS_HOST}:${OLETOOLS_PORT}";
-  scan_mime_parts = ${OLETOOLS_SCAN_MIME};
-  extended = ${OLETOOLS_BLOCK_ALL_MACROS};
+  scan_mime_parts = ${OLETOOLS_SCAN_MIME,,};
+  extended = ${OLETOOLS_BLOCK_ALL_MACROS,,};
 }
 EOF
 		fi
@@ -517,12 +546,12 @@ configure_phishing() {
 		cat <<EOF > /etc/rspamd/local.d/phishing.conf
 ## Custom Generated Phishing Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-openphish_enabled = ${PHISHING_ENABLE_OPENPHISH};
+openphish_enabled = ${PHISHING_ENABLE_OPENPHISH,,};
 openphish_map     = "${PHISHING_OPENPHISH_FEED}";
 openphish_premium = ${PHISHING_OPENPHISH_PREMIUM};
-phishtank_enabled = ${PHISHING_ENABLE_PHISHTANK};
+phishtank_enabled = ${PHISHING_ENABLE_PHISHTANK,,};
 EOF
 	fi
 }
@@ -530,11 +559,13 @@ EOF
 configure_redis() {
 	if [ "$SETUP_TYPE" = "AUTO" ]; then
 	    print_notice "Configuring Redis"
-		[[ -n "$REDIS_PASS" ]] && $redis_pass='password = "'$REDIS_PASS'";'
+		if [ -n "$REDIS_PASS" ] ; then
+       redis_pass='password = "'${REDIS_PASS}'";'
+    fi
 		cat <<EOF > /etc/rspamd/local.d/redis.conf
 ## Custom Generated Redis Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 servers = "${REDIS_HOST}:${REDIS_PORT}";
 timeout = "${REDIS_TIMEOUT}";
@@ -545,13 +576,13 @@ EOF
 }
 
 configure_reputation() {
-	if var_true $ENABLE_REPUTATION ; then
+	if var_true "${ENABLE_REPUTATION}" ; then
 		if [ "$SETUP_TYPE" = "AUTO" ]; then
 		    print_notice "Configuring Reputation"
 			cat <<EOF > /etc/rspamd/local.d/reputation.conf
 ## Custom Generated Repuation Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 rules {
   ip_reputation = {
@@ -599,7 +630,7 @@ configure_rspamd_options() {
 		cat <<EOF > /etc/rspamd/local.d/mx_check.conf
 ## Custom Generated URL Tags Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 local_addrs = "${LOCAL_IPS}";
 EOF
@@ -607,7 +638,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/actions.conf
 ## Custom Generated Actions Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 add_header = ${METRICS_ADD_HEADER};
 greylist = ${METRICS_GREYLIST};
@@ -620,7 +651,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/composites.conf
 ## Custom Generated Composites Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 MX_IMPLICIT {
   expression = "MX_GOOD & MX_MISSING";
@@ -686,7 +717,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/fuzzy_check.conf
 ## Custom Generated Fuzzy Check Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 rule "local" {
     # Fuzzy storage server list
     servers = "127.0.0.1:${WORKER_FUZZY_LISTEN_PORT}";
@@ -742,10 +773,10 @@ rule "mailcow" {
 }
 EOF
 
-		cat <<EOF > /etc/rspamd/local.d/fuzzy-group.conf
+		cat <<EOF > /etc/rspamd/local.d/fuzzy_group.conf
 ## Custom Generated Fuzzy Group Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 symbols = {
     "LOCAL_FUZZY_UNKNOWN" {
@@ -769,7 +800,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/force_actions.conf
 ## Custom Generated Force Actions Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 rules {
   WHITELIST_FORWARDING_HOST_NO_REJECT {
@@ -788,7 +819,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/groups.conf
 ## Custom Generated Groups Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 symbols {
   "CTYPE_MIXED_BOGUS" {
@@ -796,6 +827,9 @@ symbols {
   }
   "BAD_REP_POLICIES" {
     score = 2.0;
+  }
+  "BAD_HEADER" {
+    score = 10.0;
   }
   "BULK_HEADER" {
     score = 4.0;
@@ -819,12 +853,37 @@ group "MX" {
     one_shot = true;
   }
 }
+
+group "reputation" {
+    symbols = {
+        "IP_REPUTATION_HAM" {
+            weight = 1.0;
+        }
+        "IP_REPUTATION_SPAM" {
+            weight = 4.0;
+        }
+
+        "DKIM_REPUTATION" {
+            weight = 1.0;
+        }
+
+        "SPF_REPUTATION_HAM" {
+            weight = 1.0;
+        }
+        "SPF_REPUTATION_SPAM" {
+            weight = 2.0;
+        }
+        "GENERIC_REPUTATION" {
+            weight = 0.0;
+        }
+    }
+}
 EOF
 
 		cat <<EOF > /etc/rspamd/local.d/headers_group.conf
 ## Custom Generated Headers-Group Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 symbols = {
   "R_MIXED_CHARSET" {
@@ -838,7 +897,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/hfilter_group.conf
 ## Custom Generated Hostname Group Filter Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 symbols = {
     "HFILTER_HOSTNAME_UNKNOWN" {
@@ -850,7 +909,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/ip_score.conf
 ## Custom Generated IP Score Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 actions {
   reject = 1.0;
@@ -881,7 +940,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/multimap.conf
 ## Custom Generated MultiMap Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 RCPT_WANTS_SUBJECT_TAG {
   type = "rcpt";
@@ -909,6 +968,14 @@ BULK_HEADER {
   filter = "headers"
   regexp = true;
   symbols_set = ["BULK_HEADER"];
+}
+
+BAD_HEADER {
+  type = "content";
+  map = "${LOCAL_CONFDIR}/maps.d/bad_header.map";
+  filter = "headers"
+  regexp = true;
+  symbols_set = ["BAD_HEADER"];
 }
 
 LOCAL_BL_ASN {
@@ -1025,7 +1092,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/policies_group.conf
 ## Custom Generated Policies-Group Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 symbols = {
     "ARC_REJECT" {
@@ -1055,7 +1122,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/statistic.conf
 ## Custom Generated Statistic Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 classifier "bayes" {
     tokenizer {
@@ -1086,7 +1153,7 @@ EOF
 		cat <<EOF > /etc/rspamd/local.d/statistics_group.conf
 ## Custom Generated Statistics Group Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 symbols = {
     "BAYES_SPAM" {
@@ -1103,7 +1170,7 @@ EOF
 		cat <<EOF > /etc/rspamd/override.d/worker-normal.inc
 ## Custom Generated Worker Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 bind_socket = "${WORKER_LISTEN_IP}:${WORKER_LISTEN_PORT}";
 task_timeout = ${WORKER_TASK_TIMEOUT};
@@ -1123,7 +1190,7 @@ EOF
 		fi
 
 		echo "map_watch_interval = ${MAP_WATCH_INTERVAL};" >> /etc/rspamd/local.d/options.inc
-
+    echo "soft_reject_on_timeout = true;" >> /etc/rspamd/local.d/options.inc
 	fi
 }
 
@@ -1133,13 +1200,13 @@ configure_spamtrap() {
 		cat <<EOF > /etc/rspamd/local.d/spamtrap.conf
 ## Custom Generated Spamtrap Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-enabled = ${ENABLE_SPAMTRAP};
-action = "${SPAMTRAP_ACTION}";
+enabled = ${ENABLE_SPAMTRAP,,};
+action = "${SPAMTRAP_ACTION,,}";
 score = ${SPAMTRAP_SCORE};
-learn_fuzzy = ${SPAMTRAP_LEARN_FUZZY};
-learn_spam = ${SPAMTRAP_LEARN_SPAM};
+learn_fuzzy = ${SPAMTRAP_LEARN_FUZZY,,};
+learn_spam = ${SPAMTRAP_LEARN_SPAM,,};
 map = file://$LOCAL_CONFDIR/maps.d/spamtrap.map;
 EOF
 	fi
@@ -1151,9 +1218,9 @@ configure_url_reputation() {
 		cat <<EOF > /etc/rspamd/local.d/url_reputation.conf
 ## Custom Generated URL Reputation Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-enabled = ${ENABLE_URL_REPUTATION};
+enabled = ${ENABLE_URL_REPUTATION,,};
 key_prefix = "Ur.";
 
 symbols {
@@ -1181,7 +1248,6 @@ query_limit = 100;
 relevance = true;
 EOF
 	fi
-
 }
 
 configure_url_tags() {
@@ -1190,7 +1256,7 @@ configure_url_tags() {
 		cat <<EOF > /etc/rspamd/local.d/mx_check.conf
 ## Custom Generated URL Tags Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 enabled = ${ENABLE_URL_TAGS};
 EOF
@@ -1200,7 +1266,7 @@ EOF
 configure_worker_fuzzy() {
 	if [ "$SETUP_TYPE" = "AUTO" ]; then
     	print_notice "Configuring Worker: Fuzzy"
-		fuzzy_ip_array=$(echo $WORKER_FUZZY_ALLOW_UPDATE_IPS | tr "," "\n")
+		fuzzy_ip_array=$(echo "$WORKER_FUZZY_ALLOW_UPDATE_IPS" | tr "," "\n")
 		counter=1
 		for ip in $fuzzy_ip_array
 		do
@@ -1208,12 +1274,12 @@ configure_worker_fuzzy() {
 				comma=","
 			fi
 			fuzzy_ip=${fuzzy_ip}${comma}\"${ip}\"
-			let counter+=1
+			(( counter+=1 ))
     		done
 		cat <<EOF > /etc/rspamd/override.d/worker-fuzzy.inc
 ## Custom Generated Worker Fuzzy Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 bind_socket "${WORKER_FUZZY_LISTEN_IP}:${WORKER_FUZZY_LISTEN_PORT}"
 count = ${WORKER_FUZZY_COUNT};
@@ -1231,7 +1297,7 @@ configure_worker_proxy() {
 		cat <<EOF > /etc/rspamd/override.d/worker-proxy.inc
 ## Custom Generated Worker Proxy Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
-## Last Generated on `date`
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 bind_socket = "${WORKER_PROXY_LISTEN_IP}:${WORKER_PROXY_LISTEN_PORT}";
 milter = ${ENABLE_MILTER};

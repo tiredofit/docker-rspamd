@@ -13,7 +13,7 @@ if [ "$DEBUG_MODE" = "TRUE" ] || [ "$DEBUG_MODE" = "true" ]; then
 	DEBUG_ARG="--debug" 
 fi
 
-print_info "Starting rspamd"
+print_start "Starting rspamd"
 exec rspamd \
              --user rspamd \
              --group rspamd \
