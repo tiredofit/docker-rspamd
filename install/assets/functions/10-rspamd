@@ -295,7 +295,7 @@ ${dkim_domains}
 EOF
 			fi
       if [ -n "${REDIS_PASS}" ]; then redispassarg="--pass ${REDIS_PASS}" ; fi ;
-
+      sleep 5
       silent redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${REDIS_DB} ${redispassarg} DEL DKIM_KEYS
 
       for redis_dkim_script in "${RSPAMD_DATA_LOCATION}"/dkim/*.redis ; do
@@ -389,9 +389,9 @@ configure_milter() {
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-use = ["x-spamd-result", "x-rspamd-queue-id", "x-spam-level", "my-x-spam-score", "x-spam-status","authentication-results", "fuzzy-hashes"];
-skip_local = false;
-skip_authenticated = false;
+use = ["x-spam-status","authentication-results", "fuzzy-hashes"];
+skip_local = true;
+skip_authenticated = true;
 custom {
    my-x-spam-score = <<EOD
      return function(task, common_meta)
