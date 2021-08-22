@@ -1,3 +1,9 @@
+## 1.3.3 2021-08-22 <morgenroth@github>
+
+   ### Fixed
+      - rspamd_options and url_tags configuration was not being written correctly and also disabling mx_checking.
+
+
 ## 1.3.1 2021-07-29 <dave at tiredofit dot ca>
 
    ### Changed
