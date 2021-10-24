@@ -11,7 +11,7 @@ services:
     - ./logs/rspamd:/logs/rspamd
     - ./data/rspamd:/data/rspamd
     environment:
-    - ZABBIX_HOSTNAME=rspamd-app
+    - CONTAINER_NAME=rspamd-app
 
     - CONTROLLER_PASS=password
 
@@ -29,7 +29,7 @@ services:
     volumes:
     - ./db/rspamd-redis:/var/lib/redis:Z
     environment:
-    - ZABBIX_HOSTNAME=rspamd-redis
+    - CONTAINER_NAME=rspamd-redis
     networks:
     - internal
     - services

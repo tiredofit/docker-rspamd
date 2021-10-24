@@ -1,3 +1,9 @@
+## 1.3.4 2021-10-24 <dave at tiredofit dot ca>
+
+   ### Added
+      - Add openssl to the run dependencies
+
+
 ## 1.3.3 2021-08-22 <morgenroth@github>
 
    ### Fixed

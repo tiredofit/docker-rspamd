@@ -1,4 +1,4 @@
-FROM tiredofit/alpine:edge
+FROM docker.io/tiredofit/alpine:edge
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ### Disable Features From Base Image
@@ -13,6 +13,7 @@ RUN set -x && \
                redis \
                && \
    apk add -t .rspamd-run-deps \
+               openssl \
                python3 \
                rspamd \
                rspamd-client \
