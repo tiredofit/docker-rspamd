@@ -1,3 +1,9 @@
+## 1.3.5 2021-12-07 <dave at tiredofit dot ca>
+
+   ### Added
+      - Add Zabbix Agent auto registration for templates
+
+
 ## 1.3.4 2021-10-24 <dave at tiredofit dot ca>
 
    ### Added
