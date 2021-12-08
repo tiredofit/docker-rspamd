@@ -1119,6 +1119,32 @@ symbols = {
 }
 EOF
 
+    cat <<EOF > /etc/rspamd/local.d/ratelimit.conf
+## Custom Generated Ratelimit Configuration! Do not edit, instead set ENV Vars
+## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
+## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
+
+rates {
+    from_limit = {
+      selector = 'from.lower';
+      bucket = [
+        {
+          burst = ${RATELIMIT_FROM_BURST};
+          rate = "${RATELIMIT_FROM_RATE}";
+        }
+      ]
+    }
+
+    rcpt_limit = {
+      selector = 'rcpts:addr.take_n(5).lower';
+      bucket = {
+        burst = ${RATELIMIT_RCPT_BURST};
+        rate = "${RATELIMIT_RCPT_RATE}";
+      }
+    }
+  }
+EOF
+
 		cat <<EOF > /etc/rspamd/local.d/statistic.conf
 ## Custom Generated Statistic Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
@@ -1317,4 +1343,3 @@ reject_message = "${WORKER_PROXY_REJECT_MESSAGE}"; # Use custom rejection messag
 EOF
 	fi
 }
-
