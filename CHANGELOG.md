@@ -1,3 +1,8 @@
+## 1.3.6 2021-12-14 <veseahouba@github>
+
+   ### Added
+      - Option for ratelimit on incoming or outgoing messages
+
 ## 1.3.5 2021-12-07 <dave at tiredofit dot ca>
 
    ### Added
