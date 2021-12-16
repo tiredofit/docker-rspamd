@@ -1,3 +1,9 @@
+## 1.3.7 2021-12-15 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Switch to Alpine 3.15 as Edge was a bit too bleeding
+
+
 ## 1.3.6 2021-12-14 <veseahouba@github>
 
    ### Added
