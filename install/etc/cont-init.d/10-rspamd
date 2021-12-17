@@ -29,19 +29,19 @@ if [ "${MODE}" = "AIO" ] ; then
     configure_worker_fuzzy
     configure_worker_proxy
     db_ready redis
-else
-    print_info "Setting to Spam Notify AGENT mode"
-    service_stop 10-rspamd
-    rm -rf /etc/logrotate.d/rspamd
-fi
-
-if var_true "${CONTAINER_ENABLE_MONITORING}" && [ "${CONTAINER_MONITORING_BACKEND,,}" = "zabbix" ]; then
+    if var_true "${CONTAINER_ENABLE_MONITORING}" && [ "${CONTAINER_MONITORING_BACKEND,,}" = "zabbix" ]; then
         source /assets/defaults/03-monitoring
         cat <<EOF > "${ZABBIX_CONFIG_PATH}"/"${ZABBIX_CONFIG_FILE}.d"/tiredofit_rspamd.conf
 # Zabbix rspamd Configuration - Automatically Generated
 # Find Companion Zabbix Server Templates at https://github.com/tiredofit/docker-rspamd
 # Autoregister=rspamd
 EOF
+    fi
+else
+    print_info "Setting to Spam Notify AGENT mode"
+    service_stop 10-rspamd
+    rm -rf /etc/logrotate.d/rspamd
 fi
+
 
 liftoff
