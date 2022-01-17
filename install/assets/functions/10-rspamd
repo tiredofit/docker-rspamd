@@ -1119,7 +1119,8 @@ symbols = {
 }
 EOF
 
-    cat <<EOF > /etc/rspamd/local.d/ratelimit.conf
+    if var_true "${ENABLE_RATELIMITING}" ; then
+      cat <<EOF > /etc/rspamd/local.d/ratelimit.conf
 ## Custom Generated Ratelimit Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
@@ -1144,6 +1145,7 @@ rates {
     }
   }
 EOF
+    fi
 
 		cat <<EOF > /etc/rspamd/local.d/statistic.conf
 ## Custom Generated Statistic Configuration! Do not edit, instead set ENV Vars

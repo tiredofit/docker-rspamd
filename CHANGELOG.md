@@ -1,3 +1,9 @@
+## 1.3.9 2022-01-17 <dave at tiredofit dot ca>
+
+   ### Added
+      - Add ENABLE_RATELIMITING (Default: TRUE) environment variable
+
+
 ## 1.3.8 2021-12-16 <dave at tiredofit dot ca>
 
    ### Changed
