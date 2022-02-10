@@ -2,7 +2,9 @@ FROM docker.io/tiredofit/alpine:3.15
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ### Disable Features From Base Image
-ENV CONTAINER_ENABLE_MESSAGING=false
+ENV CONTAINER_ENABLE_MESSAGING=FALSE \
+    IMAGE_NAME="tiredofit/rspamd" \
+    IMAGE_REPO_URL="https://github.com/tiredofit/docker-rspamd/"
 
 ### Install Dependencies
 RUN set -x && \
