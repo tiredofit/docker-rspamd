@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bash
+#!/command/with-contenv bash
 
 clam_ready() {
     print_debug "Checking to see if ClamAV Host: ${CLAMAV_HOST} is accessible"

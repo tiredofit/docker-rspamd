@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bash
+#!/command/with-contenv bash
 
 configure_spamlearn_logging() {
 	if [ "${LOG_SPAMLEARN_TYPE}" = "FILE" ] || [ "${LOG_SPAMLEARN_TYPE}" = "file" ] ; then
