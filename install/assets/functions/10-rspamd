@@ -2,42 +2,42 @@
 
 clam_ready() {
     print_debug "Checking to see if ClamAV Host: ${CLAMAV_HOST} is accessible"
-    COUNTER=0
+    counter=0
     while ! (silent nc -z "${CLAMAV_HOST}" "${CLAMAV_PORT}") ; do
         sleep 5
-        (( COUNTER+=5 ))
-        print_warn "Clamav Host '${CLAMAV_HOST}' is not accessible, retrying.. ($COUNTER seconds so far)"
+        (( counter+=5 ))
+        print_warn "Clamav Host '${CLAMAV_HOST}' is not accessible, retrying.. ($counter seconds so far)"
     done
 }
 
 nameserver_ready() {
     print_debug "Checking to see if Nameserver Host: ${NAMESERVER} is accessible"
-    COUNTER=0
+    counter=0
     while ! (silent nc -z "${NAMESERVER}" 53) ; do
         sleep 5
-        (( COUNTER+=5 ))
-        print_warn "Nameserver Host '${NAMESERVER}' is not accessible, retrying.. ($COUNTER seconds so far)"
+        (( counter+=5 ))
+        print_warn "Nameserver Host '${NAMESERVER}' is not accessible, retrying.. ($counter seconds so far)"
     done
 
 }
 
 olefy_ready() {
     print_debug "Checking to see if Olefy Host: ${OLETOOLS_HOST} is accessible"
-    COUNTER=0
+    counter=0
     while ! (silent nc -z "${OLETOOLS_HOST}" "${OLETOOLS_PORT}") ; do
         sleep 5
-        (( COUNTER+=5 ))
-        print_warn "Olefy Host '${OLETOOLS_HOST}' is not accessible, retrying.. ($COUNTER seconds so far)"
+        (( counter+=5 ))
+        print_warn "Olefy Host '${OLETOOLS_HOST}' is not accessible, retrying.. ($counter seconds so far)"
     done
 }
 
 configure_antivirus() {
 	if var_true "${ENABLE_ANTIVIRUS}" ; then
 		clam_ready
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		if [ "${SETUP_TYPE,,}" = "auto" ]; then
 		    print_notice "Configuring Antivirus (${ANTIVIRUS_TYPE}) Filtering"
 
-			if [ -n "$CLAMAV_PORT" ] ; then
+			if [ -n "${CLAMAV_PORT}" ] ; then
 				clamav_port=":${CLAMAV_PORT}"
 			fi
 
@@ -57,11 +57,11 @@ configure_antivirus() {
 	  patterns {
 	    JUST_EICAR = "^Eicar-Test-Signature$";
 	  }
-	  whitelist = "${CONFIG_PATH}${WHITELIST_ANTIVIRUS}";
+	  whitelist = "${CONFIG_PATH}/${WHITELIST_ANTIVIRUS}";
   }
 
-  .include(try=true,priority=5) "${DBDIR}/dynamic/antivirus.conf"
-  .include(try=true,priority=10) "$LOCAL_CONFDIR/override.d/antivirus.conf"
+  .include(try=true,priority=5) "\${RSPAMD_DATA_LOCATION}/dynamic/antivirus.conf"
+  .include(try=true,priority=10) "\${RSPAMD_DATA_LOCATION}/override.d/antivirus.conf"
 EOF
 		fi
 	fi
@@ -69,7 +69,7 @@ EOF
 
 configure_asn() {
 	if var_true "${ENABLE_ASN}" ; then
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		if [ "${SETUP_TYPE,,}" = "auto" ]; then
 		    print_notice "Configuring ASN"
 			cat <<EOF > /etc/rspamd/local.d/asn.conf
 ## Custom Generated ASN Configuration! Do not edit, instead set ENV Vars
@@ -89,7 +89,7 @@ EOF
 
 ## Configure Bayesian
 configure_classifier_bayesian() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Bayesian Filtering"
 		cat <<EOF > /etc/rspamd/local.d/classifier_bayes.conf
 ## Custom Generated Classifier: Bayesian Configuration! Do not edit, instead set ENV Vars
@@ -117,20 +117,19 @@ EOF
 
 configure_controller() {
 	if var_true "${ENABLE_CONTROLLER}" ; then
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    	print_notice "Configuring Controller"
     		secure_ip_array=$(echo "$CONTROLLER_SECURE_IPS" | tr "," "\n")
 			for ip in $secure_ip_array
 			do
-    			secure_ip="${secure_ip}
-    			"$(cat <<EOF
+    			secure_ip="${secure_ip}$(cat <<EOF
 
 secure_ip "${ip}";
 
 
 
 EOF
-										)
+										)"
 			done
 			cat <<EOF > /etc/rspamd/override.d/worker-controller.inc
 ## Custom Generated Controller Configuration! Do not edit, instead set ENV Vars
@@ -141,8 +140,8 @@ count=${CONTROLLER_COUNT}
 enable_password = "${CONTROLLER_PASS}";
 ${secure_ip}
 
-.include(try=true; priority=10) "$CONFDIR/override.d/worker-controller-password.inc"
-.include(try=true; priority=20) "$CONFDIR/override.d/worker-controller.custom.inc"
+.include(try=true; priority=10) "\$CONFDIR/override.d/worker-controller-password.inc"
+.include(try=true; priority=20) "\$CONFDIR/override.d/worker-controller.custom.inc"
 EOF
 		fi
 	fi
@@ -165,7 +164,7 @@ configure_data_dir() {
 
 configure_dmarc() {
 	if var_true "${ENABLE_DMARC}" ; then
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		if [ "${SETUP_TYPE,,}" = "auto" ]; then
 			print_debug "Configuring DMARC"
 			if var_true "${DMARC_ENABLE_REPORTING}" ; then
 				if var_true "${DMARC_SEND_REPORTS}" ; then
@@ -202,12 +201,12 @@ configure_dkim() {
 	if var_true "${ENABLE_DKIM}" ; then
 		mkdir -p "${RSPAMD_DATA_LOCATION}"/dkim
 		chown -R rspamd:rspamd "${RSPAMD_DATA_LOCATION}"/dkim
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    	print_notice "Configuring DKIM"
    		    if [ ! -f "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".key ] ; then
    		    	sudo -u rspamd rspamadm dkim_keygen -b "${DKIM_KEY_SIZE}" -s "${DKIM_SELECTOR}" -k "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".key > "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}"-dns.txt
    		    	echo "Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}"-dns.txt
-            sed '1 s|^|local key = [[|' ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' > "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".redis
+            sed '1 s|^|local key = [[|' "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' > "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".redis
             echo "redis.call('HMSET', 'DKIM_KEYS', '$DKIM_SELECTOR', key)" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".redis
             print_notice "***"
    		    	print_notice "DKIM: Key generated - You must add this entry to your Nameserver to complete the step"
@@ -296,20 +295,18 @@ EOF
 			fi
       if [ -n "${REDIS_PASS}" ]; then redispassarg="--pass ${REDIS_PASS}" ; fi ;
       sleep 5
-      silent redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${REDIS_DB} ${redispassarg} DEL DKIM_KEYS
+      silent redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -n "${REDIS_DB}" "${redispassarg}" DEL DKIM_KEYS
 
       for redis_dkim_script in "${RSPAMD_DATA_LOCATION}"/dkim/*.redis ; do
                 print_debug "Redis DKIM Script executing: '${redis_dkim_script}'"
-                silent redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -n ${REDIS_DB} ${redispassarg} --eval ${redis_dkim_script}
+                silent redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -n "${REDIS_DB}" "${redispassarg}" --eval "${redis_dkim_script}"
       done
-
 		fi
-
 	fi
 }
 
 configure_greylist() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Greylist"
 		cat <<EOF > /etc/rspamd/local.d/greylist.conf
 ## Custom Generated Redis History Configuration! Do not edit, instead set ENV Vars
@@ -322,7 +319,7 @@ EOF
 }
 
 configure_history() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Redis History"
 		cat <<EOF > /etc/rspamd/local.d/history_redis.conf
 ## Custom Generated Redis History Configuration! Do not edit, instead set ENV Vars
@@ -338,7 +335,7 @@ EOF
 }
 
 configure_logging() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Logging"
 
 		debug_log_array=$(echo "${LOG_DEBUG_MODULES}" | tr "," "\n")
@@ -352,15 +349,12 @@ configure_logging() {
 			(( counter+=1 ))
 		done
 
-		if [ "${LOG_TYPE}" = "FILE" ] || [ "${LOG_TYPE}" = "file" ] ; then
+		if [ "${LOG_TYPE,,}" = "file" ] ; then
 			mkdir -p "${LOG_LOCATION}"
-			touch "${LOG_LOCATION}""${LOG_FILE}"
-			chown -R rspamd: "${LOG_LOCATION}""${LOG_FILE}"
-			sed -i "s#<LOG_LOCATION>#${LOG_LOCATION}#g" /etc/logrotate.d/rspamd
+			touch "${LOG_LOCATION}"/"${LOG_FILE}"
+			chown -R rspamd:rspamd "${LOG_LOCATION}"/"${LOG_FILE}"
+			create_logrotate rspamd "${LOG_LOCATION}"/"${LOG_FILE}" none rspamd rspamd
 			log_argument="> ${LOG_LOCATION}/${LOG_FILE}"
-      log_type="file"
-		else
-			log_type="console"
 		fi
 
 		cat <<EOF > /etc/rspamd/local.d/logging.inc
@@ -368,7 +362,7 @@ configure_logging() {
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
-type = ${log_type,,};
+type = ${LOG_TYPE,,};
 filename = '${LOG_LOCATION}${LOG_FILE}';
 level = ${LOG_LEVEL};
 color = ${LOG_CONSOLE_COLORIZE,,};
@@ -382,7 +376,7 @@ EOF
 
 configure_milter() {
 	if var_true "${ENABLE_MILTER}" ; then
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		if [ "${SETUP_TYPE,,}" = "auto" ]; then
 		    print_notice "Configuring Milter"
 			cat <<EOF > /etc/rspamd/local.d/milter_headers.conf
 ## Custom Generated Milter Headers Configuration! Do not edit, instead set ENV Vars
@@ -456,7 +450,7 @@ EOF
 }
 
 configure_mx_check() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring MX Checking"
 		cat <<EOF > /etc/rspamd/local.d/mx_check.conf
 ## Custom Generated MX Check Configuration! Do not edit, instead set ENV Vars
@@ -475,7 +469,7 @@ EOF
 }
 
 configure_neural() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Neural Training"
 	    cat <<EOF > /etc/rspamd/local.d/neural.conf
 ## Custom Generated MX Check Configuration! Do not edit, instead set ENV Vars
@@ -523,7 +517,7 @@ EOF
 configure_oletools() {
 	if var_true "${ENABLE_OLETOOLS}" ; then
 		olefy_ready
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		if [ "${SETUP_TYPE,,}" = "auto" ]; then
 		    print_notice "Configuring OLE Tools"
 			cat <<EOF > /etc/rspamd/local.d/external_services.conf
 ## Custom Generated External Services Configuration! Do not edit, instead set ENV Vars
@@ -541,7 +535,7 @@ EOF
 }
 
 configure_phishing() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Phishing"
 		cat <<EOF > /etc/rspamd/local.d/phishing.conf
 ## Custom Generated Phishing Configuration! Do not edit, instead set ENV Vars
@@ -557,7 +551,7 @@ EOF
 }
 
 configure_redis() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Redis"
 		if [ -n "$REDIS_PASS" ] ; then
        redis_pass='password = "'${REDIS_PASS}'";'
@@ -577,7 +571,7 @@ EOF
 
 configure_reputation() {
 	if var_true "${ENABLE_REPUTATION}" ; then
-		if [ "$SETUP_TYPE" = "AUTO" ]; then
+		if [ "${SETUP_TYPE,,}" = "auto" ]; then
 		    print_notice "Configuring Reputation"
 			cat <<EOF > /etc/rspamd/local.d/reputation.conf
 ## Custom Generated Repuation Configuration! Do not edit, instead set ENV Vars
@@ -625,7 +619,7 @@ EOF
 }
 
 configure_rspamd_options() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring RSpamD Options"
 		cat <<EOF > /etc/rspamd/local.d/rspamd_options.conf
 ## Custom Generated rspamd configuration! Do not edit, instead set ENV Vars
@@ -964,7 +958,7 @@ WHITELISTED_FWD_HOST {
 
 BULK_HEADER {
   type = "content";
-  map = "${LOCAL_CONFDIR}/maps.d/bulk_header.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/bulk_header.map";
   filter = "headers"
   regexp = true;
   symbols_set = ["BULK_HEADER"];
@@ -972,7 +966,7 @@ BULK_HEADER {
 
 BAD_HEADER {
   type = "content";
-  map = "${LOCAL_CONFDIR}/maps.d/bad_header.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/bad_header.map";
   filter = "headers"
   regexp = true;
   symbols_set = ["BAD_HEADER"];
@@ -980,7 +974,7 @@ BAD_HEADER {
 
 LOCAL_BL_ASN {
   type = "asn";
-  map = "${LOCAL_CONFDIR}/maps.d/bad_asn.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/bad_asn.map";
   score = 5;
   description = "Sender's ASN is on the local blacklist";
   symbols_set = ["LOCAL_BL_ASN"];
@@ -988,14 +982,14 @@ LOCAL_BL_ASN {
 
 GLOBAL_SMTP_FROM_WL {
   type = "from";
-  map = "${LOCAL_CONFDIR}/maps.d/global_smtp_from_whitelist.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/global_smtp_from_whitelist.map";
   regexp = true;
   score = -2050;
 }
 
 GLOBAL_SMTP_FROM_BL {
   type = "from";
-  map = "${LOCAL_CONFDIR}/maps.d/global_smtp_from_blacklist.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/global_smtp_from_blacklist.map";
   regexp = true;
   prefilter = true;
   action = "reject";
@@ -1004,7 +998,7 @@ GLOBAL_SMTP_FROM_BL {
 GLOBAL_MIME_FROM_WL {
   type = "header";
   header = "from";
-  map = "${LOCAL_CONFDIR}/maps.d/global_mime_from_whitelist.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/global_mime_from_whitelist.map";
   regexp = true;
   score = -2050;
 }
@@ -1012,7 +1006,7 @@ GLOBAL_MIME_FROM_WL {
 GLOBAL_MIME_FROM_BL {
   type = "header";
   header = "from";
-  map = "${LOCAL_CONFDIR}/maps.d/global_mime_from_blacklist.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/global_mime_from_blacklist.map";
   regexp = true;
   prefilter = true;
   action = "reject";
@@ -1020,7 +1014,7 @@ GLOBAL_MIME_FROM_BL {
 
 GLOBAL_RCPT_WL {
   type = "rcpt";
-  map = "${LOCAL_CONFDIR}/maps.d/global_rcpt_whitelist.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/global_rcpt_whitelist.map";
   regexp = true;
   prefilter = true;
   action = "accept";
@@ -1028,7 +1022,7 @@ GLOBAL_RCPT_WL {
 
 GLOBAL_RCPT_BL {
   type = "rcpt";
-  map = "${LOCAL_CONFDIR}/maps.d/global_rcpt_blacklist.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/global_rcpt_blacklist.map";
   regexp = true;
   prefilter = true;
   action = "reject";
@@ -1036,13 +1030,13 @@ GLOBAL_RCPT_BL {
 
 RSPAMD_HOST {
   type = "ip";
-  map = "${LOCAL_CONFDIR}/maps.d/rspamd_trusted.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/rspamd_trusted.map";
   symbols_set = ["RSPAMD_HOST"];
 }
 
 IP_WHITELIST {
   type = "ip";
-  map = "${LOCAL_CONFDIR}/maps.d/ip_wl.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/ip_wl.map";
   symbols_set = ["IP_WHITELIST"];
   score = -2050;
 }
@@ -1050,7 +1044,7 @@ IP_WHITELIST {
 FISHY_TLD {
   type = "from";
   filter = "email:domain";
-  map = "${LOCAL_CONFDIR}/maps.d/fishy_tlds.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/fishy_tlds.map";
   regexp = true;
   score = 0.1;
 }
@@ -1058,7 +1052,7 @@ FISHY_TLD {
 BAD_WORDS {
   type = "content";
   filter = "text";
-  map = "${LOCAL_CONFDIR}/maps.d/bad_words.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/bad_words.map";
   regexp = true;
   score = 0.1;
 }
@@ -1066,7 +1060,7 @@ BAD_WORDS {
 BAD_LANG {
   type = 'selector';
   selector = 'languages';
-  map = "${LOCAL_CONFDIR}/maps.d/bad_languages.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/bad_languages.map";
   symbols_set = ["LANG_FILTER"];
   regexp = true;
   score = 5.0;
@@ -1082,7 +1076,7 @@ BAZAR_ABUSE_CH {
 WHITELIST_SENDER_DOMAIN {
   type = "from";
   filter = "email:domain";
-  map = "${LOCAL_CONFDIR}/maps.d/whitelist.sender.domain.map";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/whitelist.sender.domain.map";
   score = -10.0
 }
 
@@ -1223,7 +1217,7 @@ EOF
 }
 
 configure_spamtrap() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Spamtrap"
 		cat <<EOF > /etc/rspamd/local.d/spamtrap.conf
 ## Custom Generated Spamtrap Configuration! Do not edit, instead set ENV Vars
@@ -1235,13 +1229,13 @@ action = "${SPAMTRAP_ACTION,,}";
 score = ${SPAMTRAP_SCORE};
 learn_fuzzy = ${SPAMTRAP_LEARN_FUZZY,,};
 learn_spam = ${SPAMTRAP_LEARN_SPAM,,};
-map = file://$LOCAL_CONFDIR/maps.d/spamtrap.map;
+map = file://${RSPAMD_DATA_LOCATION}/maps.d/spamtrap.map;
 EOF
 	fi
 }
 
 configure_url_reputation() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring URL Reputation Checking"
 		cat <<EOF > /etc/rspamd/local.d/url_reputation.conf
 ## Custom Generated URL Reputation Configuration! Do not edit, instead set ENV Vars
@@ -1279,7 +1273,7 @@ EOF
 }
 
 configure_url_tags() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring URL Tags Checking"
 		cat <<EOF > /etc/rspamd/local.d/url_tags.conf
 ## Custom Generated URL Tags Configuration! Do not edit, instead set ENV Vars
@@ -1292,7 +1286,7 @@ EOF
 }
 
 configure_worker_fuzzy() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
     	print_notice "Configuring Worker: Fuzzy"
 		fuzzy_ip_array=$(echo "$WORKER_FUZZY_ALLOW_UPDATE_IPS" | tr "," "\n")
 		counter=1
@@ -1320,7 +1314,7 @@ EOF
 }
 
 configure_worker_proxy() {
-	if [ "$SETUP_TYPE" = "AUTO" ]; then
+	if [ "${SETUP_TYPE,,}" = "auto" ]; then
     	print_notice "Configuring Worker: Proxy"
 		cat <<EOF > /etc/rspamd/override.d/worker-proxy.inc
 ## Custom Generated Worker Proxy Configuration! Do not edit, instead set ENV Vars

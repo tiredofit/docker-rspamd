@@ -33,7 +33,6 @@ if [ "${MODE}" = "AIO" ] ; then
 else
     print_info "Setting to Spam Notify AGENT mode"
     service_stop 10-rspamd
-    rm -rf /etc/logrotate.d/rspamd
 fi
 
 

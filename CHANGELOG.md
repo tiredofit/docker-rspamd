@@ -1,3 +1,10 @@
+## 1.3.15 2022-06-15 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Cleanup some code including logging
+      - Fix environment variables supporting overrides
+
+
 ## 1.3.14 2022-05-24 <dave at tiredofit dot ca>
 
    ### Added

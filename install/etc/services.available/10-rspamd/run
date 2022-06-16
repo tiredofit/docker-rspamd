@@ -9,8 +9,8 @@ check_service_initialized init
 liftoff
 
 ### Set Debug Mode
-if [ "$DEBUG_MODE" = "TRUE" ] || [ "$DEBUG_MODE" = "true" ]; then
-	DEBUG_ARG="--debug" 
+if var_true "${DEBUG_MODE}" ; then
+	debug_arg="--debug"
 fi
 
 print_start "Starting rspamd"
@@ -18,5 +18,5 @@ exec rspamd \
              --user rspamd \
              --group rspamd \
              --no-fork \
-             $DEBUG_ARG \
+             ${debug_arg} \
              DBDIR=${RSPAMD_DATA_LOCATION}
