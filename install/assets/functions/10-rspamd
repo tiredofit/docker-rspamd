@@ -60,8 +60,8 @@ configure_antivirus() {
 	  whitelist = "${CONFIG_PATH}/${WHITELIST_ANTIVIRUS}";
   }
 
-  .include(try=true,priority=5) "\${RSPAMD_DATA_LOCATION}/dynamic/antivirus.conf"
-  .include(try=true,priority=10) "\${RSPAMD_DATA_LOCATION}/override.d/antivirus.conf"
+ .include(try=true,priority=5) "${DBDIR}/dynamic/antivirus.conf"
+ .include(try=true,priority=10) "$LOCAL_CONFDIR/override.d/antivirus.conf"
 EOF
 		fi
 	fi
@@ -150,16 +150,18 @@ EOF
 configure_data_dir() {
 	### Set Permissions
 	mkdir -p "${RSPAMD_DATA_LOCATION}"
-	mkdir -p "${RSPAMD_DATA_LOCATION}"/dynamic
+	mkdir -p "${RSPAMD_DATA_LOCATION}"/data/dynamic
+  mkdir -p "${RSPAMD_DATA_LOCATION}"/data
     if [ ! -d "${RSPAMD_DATA_LOCATION}"/maps.d ] ; then
         print_debug "Setting up Custom maps.d folder"
     	mkdir -p "${RSPAMD_DATA_LOCATION}"/maps.d
     	cp -R /assets/rspamd/maps.d/* "${RSPAMD_DATA_LOCATION}"/maps.d
     fi
-    ln -sf "${RSPAMD_DATA_LOCATION}"/maps.d /etc/rspamd/maps.d
+  rm -rf /etc/rspamd/maps.d
+  ln -sf "${RSPAMD_DATA_LOCATION}"/maps.d /etc/rspamd/maps.d
 	chown -R rspamd:rspamd "${RSPAMD_DATA_LOCATION}"
 	rm -rf /var/lib/rspamd
-	ln -sf "${RSPAMD_DATA_LOCATION}" /var/lib/rspamd
+	ln -sf "${RSPAMD_DATA_LOCATION}"/data /var/lib/rspamd
 }
 
 configure_dmarc() {
