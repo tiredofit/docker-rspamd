@@ -555,9 +555,9 @@ EOF
 configure_redis() {
 	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Redis"
-		if [ -n "$REDIS_PASS" ] ; then
-       redis_pass='password = "'${REDIS_PASS}'";'
-    fi
+		if [ -n "${REDIS_PASS}" ] ; then
+           redis_pass='password = "'${REDIS_PASS}'";'
+        fi
 		cat <<EOF > /etc/rspamd/local.d/redis.conf
 ## Custom Generated Redis Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
@@ -566,9 +566,9 @@ configure_redis() {
 servers = "${REDIS_HOST}:${REDIS_PORT}";
 timeout = "${REDIS_TIMEOUT}";
 db = "${REDIS_DB}";
-${REDIS_PASS}
+${redis_pass}
 EOF
-	fi
+    fi
 }
 
 configure_reputation() {

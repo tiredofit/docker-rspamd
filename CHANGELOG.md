@@ -1,3 +1,9 @@
+## 1.3.17 2022-07-18 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Fix for Redis Pass not writing properly to configuration files
+
+
 ## 1.3.16 2022-06-27 <dave at tiredofit dot ca>
 
    ### Changed
