@@ -1,3 +1,9 @@
+## 1.3.18 2022-07-18 <dave at tiredofit dot ca>
+
+   ### Added
+      - Rebuild using latest tiredofit/alpine:edge
+
+
 ## 1.3.17 2022-07-18 <dave at tiredofit dot ca>
 
    ### Changed
