@@ -1,3 +1,9 @@
+## 1.3.19 2022-07-26 <dave at tiredofit dot ca>
+
+   ### Added
+      - Refresh tiredofit/alpine:edge base image
+
+
 ## 1.3.18 2022-07-18 <dave at tiredofit dot ca>
 
    ### Added
