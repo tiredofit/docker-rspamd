@@ -1,3 +1,9 @@
+## 1.3.20 2022-08-11 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Fix for logrotate issues
+
+
 ## 1.3.19 2022-07-26 <dave at tiredofit dot ca>
 
    ### Added

@@ -353,8 +353,9 @@ configure_logging() {
 
 		if [ "${LOG_TYPE,,}" = "file" ] ; then
 			mkdir -p "${LOG_LOCATION}"
-			touch "${LOG_LOCATION}"/"${LOG_FILE}"
-			chown -R rspamd:rspamd "${LOG_LOCATION}"/"${LOG_FILE}"
+			chown -R rspamd:rspamd "${LOG_LOCATION}"
+            touch "${LOG_LOCATION}"/"${LOG_FILE}"
+			chown -R rspamd:rspamd "${LOG_LOCATION}"
 			create_logrotate rspamd "${LOG_LOCATION}"/"${LOG_FILE}" none rspamd rspamd
 			log_argument="> ${LOG_LOCATION}/${LOG_FILE}"
 		fi

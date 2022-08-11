@@ -7,7 +7,7 @@ configure_spamlearn_logging() {
 		if [ "${LOG_SPAMLEARN_TYPE,,}" = "file" ] ; then
 			mkdir -p "${LOG_SPAMLEARN_LOCATION}"
 			touch "${LOG_SPAMLEARN_LOCATION}"/"${LOG_SPAMLEARN_FILE}"
-			chown -R rspamd:rspamd "${LOG_SPAMLEARN_LOCATION}"/"${LOG_SPAMLEARN_FILE}"
+			chown -R rspamd:rspamd "${LOG_SPAMLEARN_LOCATION}"
 			create_logrotate rspamd_spamlearn ${LOG_SPAMLEARN_LOCATION}/${LOG_SPAMLEARN_FILE} none rspamd rspamd
 		fi
 	fi
