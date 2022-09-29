@@ -1,38 +1,40 @@
-version: '3.7'
+version: '2.4'
 services:
   
   rspamd-app:
-    image: registry.selfdesign.org/docker/rspamd
+    image: tiredofit/rspamd
     container_name: rspamd-app
     ports: 
-    - 11333:11333
-    - 11334:11334
+      - 11333:11333
+      - 11334:11334
     volumes:
-    - ./logs/rspamd:/logs/rspamd
-    - ./data/rspamd:/data/rspamd
+      - ./logs/rspamd:/logs/rspamd
+      - ./data/rspamd:/data/rspamd
     environment:
-    - CONTAINER_NAME=rspamd-app
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=rspamd-app
 
-    - CONTROLLER_PASS=password
+      - CONTROLLER_PASS=password
 
-    - REDIS_HOST=rspamd-redis
-    - CLAMAV_HOST=clamd
-    - CLAMAV_PORT=3310
+      - REDIS_HOST=rspamd-redis
+      - CLAMAV_HOST=clamd
+      - CLAMAV_PORT=3310
     networks:
-    - internal
-    - services
+      - internal
+      - services
     restart: always
 
   rspamd-redis:
     container_name: rspamd-redis
-    image: registry.selfdesign.org/docker/redis/5/:latest
+    image: tiredofit/redis:7-latest
     volumes:
-    - ./db/rspamd-redis:/var/lib/redis:Z
+      - ./db/rspamd-redis:/var/lib/redis:Z
     environment:
-    - CONTAINER_NAME=rspamd-redis
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=rspamd-redis
     networks:
-    - internal
-    - services
+      - internal
+      - services
     restart: always
 
 
