@@ -1,34 +1,39 @@
 #!/command/with-contenv bash
 
 clam_ready() {
-    print_debug "Checking to see if ClamAV Host: ${CLAMAV_HOST} is accessible"
-    counter=0
-    while ! (silent nc -z "${CLAMAV_HOST}" "${CLAMAV_PORT}") ; do
-        sleep 5
-        (( counter+=5 ))
-        print_warn "Clamav Host '${CLAMAV_HOST}' is not accessible, retrying.. ($counter seconds so far)"
-    done
+    if var_nottrue "${SKIP_CLAMAV_HOST_CHECK}" ; then
+        print_debug "Checking to see if ClamAV Host: ${CLAMAV_HOST} is accessible"
+        counter=0
+        while ! (silent nc -z "${CLAMAV_HOST}" "${CLAMAV_PORT}") ; do
+            sleep 5
+            (( counter+=5 ))
+            print_warn "Clamav Host '${CLAMAV_HOST}' is not accessible, retrying.. ($counter seconds so far)"
+        done
+    fi
 }
 
 nameserver_ready() {
-    print_debug "Checking to see if Nameserver Host: ${NAMESERVER} is accessible"
-    counter=0
-    while ! (silent nc -z "${NAMESERVER}" 53) ; do
-        sleep 5
-        (( counter+=5 ))
-        print_warn "Nameserver Host '${NAMESERVER}' is not accessible, retrying.. ($counter seconds so far)"
-    done
-
+    if var_nottrue "${SKIP_NAMESERVER_HOST_CHECK}" ; then
+        print_debug "Checking to see if Nameserver Host: ${NAMESERVER} is accessible"
+        counter=0
+        while ! (silent nc -z "${NAMESERVER}" 53) ; do
+            sleep 5
+            (( counter+=5 ))
+            print_warn "Nameserver Host '${NAMESERVER}' is not accessible, retrying.. ($counter seconds so far)"
+        done
+    fi
 }
 
 olefy_ready() {
-    print_debug "Checking to see if Olefy Host: ${OLETOOLS_HOST} is accessible"
-    counter=0
-    while ! (silent nc -z "${OLETOOLS_HOST}" "${OLETOOLS_PORT}") ; do
-        sleep 5
-        (( counter+=5 ))
-        print_warn "Olefy Host '${OLETOOLS_HOST}' is not accessible, retrying.. ($counter seconds so far)"
-    done
+    if var_nottrue "${SKIP_OLEFY_HOST_CHECK}" ; then
+        print_debug "Checking to see if Olefy Host: ${OLETOOLS_HOST} is accessible"
+        counter=0
+        while ! (silent nc -z "${OLETOOLS_HOST}" "${OLETOOLS_PORT}") ; do
+            sleep 5
+            (( counter+=5 ))
+            print_warn "Olefy Host '${OLETOOLS_HOST}' is not accessible, retrying.. ($counter seconds so far)"
+        done
+    fi
 }
 
 configure_antivirus() {
@@ -208,9 +213,9 @@ configure_dkim() {
    		    if [ ! -f "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".key ] ; then
    		    	sudo -u rspamd rspamadm dkim_keygen -b "${DKIM_KEY_SIZE}" -s "${DKIM_SELECTOR}" -k "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".key > "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}"-dns.txt
    		    	echo "Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}"-dns.txt
-            sed '1 s|^|local key = [[|' "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' > "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".redis
-            echo "redis.call('HMSET', 'DKIM_KEYS', '$DKIM_SELECTOR', key)" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".redis
-            print_notice "***"
+                sed '1 s|^|local key = [[|' "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' > "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".redis
+                echo "redis.call('HMSET', 'DKIM_KEYS', '$DKIM_SELECTOR', key)" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}".redis
+                print_notice "***"
    		    	print_notice "DKIM: Key generated - You must add this entry to your Nameserver to complete the step"
    		    	cat "${RSPAMD_DATA_LOCATION}"/dkim/"${DKIM_SELECTOR}"-dns.txt
    		    	print_notice "It can also be found at ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}-dns.txt"

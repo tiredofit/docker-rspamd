@@ -7,21 +7,26 @@ configure_spamlearn_logging() {
 		if [ "${LOG_SPAMLEARN_TYPE,,}" = "file" ] ; then
 			mkdir -p "${LOG_SPAMLEARN_LOCATION}"
 			touch "${LOG_SPAMLEARN_LOCATION}"/"${LOG_SPAMLEARN_FILE}"
+<<<<<<< Updated upstream
 			chown -R rspamd:rspamd "${LOG_SPAMLEARN_LOCATION}"
 			create_logrotate rspamd_spamlearn ${LOG_SPAMLEARN_LOCATION}/${LOG_SPAMLEARN_FILE} none rspamd rspamd
+=======
+			chown -R rspamd:rspamd "${LOG_SPAMLEARN_LOCATION}"/"${LOG_SPAMLEARN_FILE}"
+			create_logrotate rspamd_spamlearn "${LOG_SPAMLEARN_LOCATION}"/"${LOG_SPAMLEARN_FILE}" none rspamd rspamd
+>>>>>>> Stashed changes
 		fi
 	fi
 }
 
 create_spamlearn_configuration() {
-	if var_true ${ENABLE_SPAMLEARN_INOTIFY} ; then
-		mkdir -p ${SPAMLEARN_HAM_LOCATION}
-		mkdir -p ${SPAMLEARN_SPAM_LOCATION}
+	if var_true "${ENABLE_SPAMLEARN_INOTIFY}" ; then
+		mkdir -p "${SPAMLEARN_HAM_LOCATION}"
+		mkdir -p "${SPAMLEARN_SPAM_LOCATION}"
 
 		if [ "${SETUP_TYPE}" = "AUTO" ]; then
     		print_notice "Configuring Spam Learning"
-			mkdir -p $(dirname ${SPAMLEARN_CONFIG_FILE})
-			cat <<EOF > ${SPAMLEARN_CONFIG_FILE}
+			mkdir -p $(dirname "${SPAMLEARN_CONFIG_FILE}")
+			cat <<EOF > "${SPAMLEARN_CONFIG_FILE}"
 ## Custom Generated Spam Learning Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')

@@ -1,3 +1,12 @@
+## 1.3.21 2022-10-06 <dave at tiredofit dot ca>
+
+This is an upgrade to RSPAMD 3.3 which if upgrading deserves review of https://rspamd.com/doc/migration.html#migration-to-rspamd-33 particularly the Redis cleanup required.
+
+   ### Added
+      - RSPAMD 3.3
+      - Introduce SKIP_REDIS_HOST_CHECK, SKIP_NAMESERVER_HOST_CHECK, SKIP_CLAMAV_HOST_CHECK, SKIP_OLEFY_HOST_CHECK variables to stop checking for host avaiability before starting - All values `FALSE` by default
+
+
 ## 1.3.20 2022-08-11 <dave at tiredofit dot ca>
 
    ### Changed

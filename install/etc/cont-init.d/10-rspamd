@@ -28,7 +28,7 @@ if [ "${MODE}" = "AIO" ] ; then
     configure_url_tags
     configure_worker_fuzzy
     configure_worker_proxy
-    db_ready redis
+    if var_nottrue "${SKIP_REDIS_HOST_CHECK}" ; then db_ready redis ; fi
     create_zabbix rspamd
 else
     print_info "Setting to Spam Notify AGENT mode"
