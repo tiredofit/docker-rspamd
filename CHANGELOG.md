@@ -1,3 +1,9 @@
+## 1.4.1 2022-10-25 <dave at tiredofit dot ca>
+
+   ### Added
+      - Add additional packages to run dependencies
+
+
 ## 1.4.0 2022-10-25 <dave at tiredofit dot ca>
 
    ### Added

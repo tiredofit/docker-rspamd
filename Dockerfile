@@ -44,7 +44,10 @@ RUN source /assets/functions/00-container && \
                 glib \
                 icu \
                 icu-data-full \
+                libestr \
+                libfastjson \
                 libsodium \
+                libuuid \
                 luajit \
                 pcre2 \
                 openssl \
