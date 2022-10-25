@@ -13,7 +13,7 @@ if var_true "${DEBUG_MODE}" ; then
 	debug_arg="--debug"
 fi
 
-print_start "Starting rspamd"
+print_start "Starting rspamd ${RSPAMD_VERSION}"
 exec rspamd \
              --user rspamd \
              --group rspamd \

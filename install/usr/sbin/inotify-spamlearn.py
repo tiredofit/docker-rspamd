@@ -13,7 +13,7 @@ import inotify.adapters
 def getconfig():
     config = configparser.ConfigParser()
     try:
-        config.read('<CONFIG_FILE>')
+        config.read('{{SPAMLEARN_CONFIG_FILE}}')
         spam_dir = config.get('paths', 'spam_dir')
         ham_dir = config.get('paths', 'ham_dir')
         spamcmd = config.get('spam', 'spamcmd')

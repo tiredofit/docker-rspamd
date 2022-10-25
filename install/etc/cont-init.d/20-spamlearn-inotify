@@ -4,7 +4,7 @@ source /assets/functions/00-container
 prepare_service
 PROCESS_NAME="spamlearn-inotify"
 
-sed -i "s#<CONFIG_FILE>#${SPAMLEARN_CONFIG_FILE}#g" /usr/sbin/inotify-spamlearn.py
+update_template /usr/sbin/inotify-spamlearn.py SPAMLEARN_CONFIG_FILE
 
 configure_spamlearn_logging
 create_spamlearn_configuration

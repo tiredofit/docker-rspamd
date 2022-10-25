@@ -1,3 +1,12 @@
+## 1.4.0 2022-10-25 <dave at tiredofit dot ca>
+
+   ### Added
+      - Switch to building RSPAMD from source
+
+   ### Changed
+      - Fix for inotify spam learning
+
+
 ## 1.3.21 2022-10-06 <dave at tiredofit dot ca>
 
 This is an upgrade to RSPAMD 3.3 which if upgrading deserves review of https://rspamd.com/doc/migration.html#migration-to-rspamd-33 particularly the Redis cleanup required.
