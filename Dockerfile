@@ -1,4 +1,4 @@
-FROM docker.io/tiredofit/alpine:3.16
+FROM docker.io/tiredofit/alpine:3.17
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ARG RSPAMD_VERSION
@@ -26,7 +26,7 @@ RUN source /assets/functions/00-container && \
                 icu-dev \
                 libsodium-dev \
                 luajit-dev \
-                openssl1.1-compat-dev \
+                openssl-dev \
                 pcre2-dev \
                 perl \
                 py3-pip \
@@ -103,4 +103,4 @@ RUN source /assets/functions/00-container && \
 EXPOSE 11333 11334 11335
 
 ### Add Files
-ADD install /
+COPY install /
