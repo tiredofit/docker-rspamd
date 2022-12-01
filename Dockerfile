@@ -1,4 +1,7 @@
-FROM docker.io/tiredofit/alpine:3.17
+ARG DISTRO="alpine"
+ARG DISTRO_VARIANT="3.17"
+
+FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ARG RSPAMD_VERSION
@@ -14,9 +17,9 @@ RUN source /assets/functions/00-container && \
     set -x && \
     addgroup -S -g 11333 rspamd && \
     adduser -S -D -H -h /dev/null -s /sbin/nologin -G rspamd -u 11333 rspamd && \
-    apk update && \
-    apk upgrade && \
-    apk add -t .rspamd-build-deps \
+    package update && \
+    package upgrade && \
+    package install .rspamd-build-deps \
                 build-base \
                 cmake \
                 curl-dev \
@@ -39,7 +42,7 @@ RUN source /assets/functions/00-container && \
                 zstd-dev \
                 && \
     \
-    apk add -t .rspamd-run-deps \
+    package install .rspamd-run-deps \
                 fmt \
                 glib \
                 icu \
@@ -95,12 +98,11 @@ RUN source /assets/functions/00-container && \
     mv /etc/rspamd/maps.d /assets/rspamd/ && \
     mv /usr/bin/redis-cli /usr/sbin && \
     \
-### Cleanup
-    apk del .rspamd-build-deps && \
-    rm -rf /etc/logrotate.d/* /var/cache/apk/* /usr/src/*
+    package remove .rspamd-build-deps && \
+    package cleanup && \
+    rm -rf /etc/logrotate.d/* \
+           /var/cache/package/* 
 
-### Networking Configuration
 EXPOSE 11333 11334 11335
 
-### Add Files
 COPY install /
