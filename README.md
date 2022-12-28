@@ -1,7 +1,7 @@
 # github.com/tiredofit/docker-rspamd
 
 [![GitHub release](https://img.shields.io/github/v/tag/tiredofit/docker-rspamd?style=flat-square)](https://github.com/tiredofit/docker-rspamd/releases/latest)
-[![Build Status](https://img.shields.io/github/workflow/status/tiredofit/docker-rspamd/build?style=flat-square)](https://github.com/tiredofit/docker-rspamd/actions?query=workflow%3Abuild)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/tiredofit/docker-rspamd/main.yml?branch=main&style=flat-square)](https://github.com/tiredofit/docker-rspamd/actions)
 [![Docker Stars](https://img.shields.io/docker/stars/tiredofit/rspamd.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/rspamd/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/tiredofit/rspamd.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/rspamd/)
 [![Become a sponsor](https://img.shields.io/badge/sponsor-tiredofit-181717.svg?logo=github&style=flat-square)](https://github.com/sponsors/tiredofit)

@@ -1,3 +1,13 @@
+## 1.6.0 2022-12-28 <dave at tiredofit dot ca>
+
+   ### Added
+      - Rspamd 3.4
+
+   ### Changed
+      - Add xxhash as a dependency
+      - Add zstd-libs as a dependency to solve strange symbol issues
+
+
 ## 1.5.1 2022-12-01 <dave at tiredofit dot ca>
 
    ### Changed

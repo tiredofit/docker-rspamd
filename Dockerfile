@@ -6,7 +6,7 @@ LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ARG RSPAMD_VERSION
 
-ENV RSPAMD_VERSION=${RSPAMD_VERSION:-"3.3"} \
+ENV RSPAMD_VERSION=${RSPAMD_VERSION:-"3.4"} \
     RSPAMD_REPO_URL=https://github.com/rspamd/rspamd \
     CONTAINER_ENABLE_MESSAGING=FALSE \
     IMAGE_NAME="tiredofit/rspamd" \
@@ -38,6 +38,7 @@ RUN source /assets/functions/00-container && \
                 samurai \
                 sqlite-dev \
                 vectorscan-dev \
+                xxhash-dev \
                 zlib-dev \
                 zstd-dev \
                 && \
@@ -58,8 +59,10 @@ RUN source /assets/functions/00-container && \
                 rsyslog \
                 sqlite \
                 vectorscan \
+                xxhash \
                 zlib \
                 zstd \
+                zstd-libs \
                 && \
     \
     pip3 install \
@@ -83,6 +86,7 @@ RUN source /assets/functions/00-container && \
                   -DENABLE_LUAJIT=ON \
                   #-DNO_SHARED=OFF \
                   -DSYSTEM_FMT=ON \
+                  -DSYSTEM_XXHASH=ON \
                   -DSYSTEM_ZSTD=ON \
                   -DCMAKE_HOST_SYSTEM_NAME=Linux \
                   . \
@@ -101,7 +105,7 @@ RUN source /assets/functions/00-container && \
     package remove .rspamd-build-deps && \
     package cleanup && \
     rm -rf /etc/logrotate.d/* \
-           /var/cache/package/* 
+           /var/cache/package/*
 
 EXPOSE 11333 11334 11335
 
