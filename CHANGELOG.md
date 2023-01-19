@@ -1,3 +1,9 @@
+## 1.6.1 2023-01-18 <dave at tiredofit dot ca>
+
+   ### Added
+      - Add METRICS_SPOOF_REPLYTO environment variable
+
+
 ## 1.6.0 2022-12-28 <dave at tiredofit dot ca>
 
    ### Added
