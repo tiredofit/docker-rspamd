@@ -122,6 +122,7 @@ EOF
 
 configure_controller() {
 	if var_true "${ENABLE_CONTROLLER}" ; then
+        transform_file_var CONTROLLER_PASS
 		if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    	print_notice "Configuring Controller"
     		secure_ip_array=$(echo "$CONTROLLER_SECURE_IPS" | tr "," "\n")
@@ -300,6 +301,11 @@ use_redis = false;
 ${dkim_domains}
 EOF
 			fi
+      transform_file_var \
+                            REDIS_DB \
+                            REDIS_HOST \
+                            REDIS_PASS \
+                            REDIS_PORT
       if [ -n "${REDIS_PASS}" ]; then redispassarg="--pass ${REDIS_PASS}" ; fi ;
       sleep 5
       silent redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -n "${REDIS_DB}" "${redispassarg}" DEL DKIM_KEYS
@@ -561,6 +567,11 @@ EOF
 configure_redis() {
 	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Redis"
+        transform_file_var \
+                                REDIS_DB \
+                                REDIS_HOST \
+                                REDIS_PASS \
+                                REDIS_PORT
 		if [ -n "${REDIS_PASS}" ] ; then
            redis_pass='password = "'${REDIS_PASS}'";'
         fi
