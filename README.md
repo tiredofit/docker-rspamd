@@ -49,7 +49,7 @@ Clone this repository and build the image with `docker build -t (imagename) .`
 Builds of the image are available on [Docker Hub](https://hub.docker.com/r/tiredofit/rspamd)
 
 ```bash
-docker pull docker.io/tiredofdit/rspamd:(imagetag)
+docker pull docker.io/tiredofit/rspamd:(imagetag)
 ```
 Builds of the image are also available on the [Github Container Registry](https://github.com/tiredofit/docker-rspamd/pkgs/container/docker-rspamd) 
  
