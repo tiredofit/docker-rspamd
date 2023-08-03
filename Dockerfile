@@ -6,7 +6,7 @@ LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ARG RSPAMD_VERSION
 
-ENV RSPAMD_VERSION=${RSPAMD_VERSION:-"3.5"} \
+ENV RSPAMD_VERSION=${RSPAMD_VERSION:-"3.6"} \
     RSPAMD_REPO_URL=https://github.com/rspamd/rspamd \
     CONTAINER_ENABLE_MESSAGING=FALSE \
     IMAGE_NAME="tiredofit/rspamd" \
