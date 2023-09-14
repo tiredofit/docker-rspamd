@@ -69,7 +69,7 @@ RUN source /assets/functions/00-container && \
                 configparser \
                 inotify \
                 && \
-    \
+   \
    clone_git_repo ${RSPAMD_REPO_URL} ${RSPAMD_VERSION} && \
    cmake \
                   -B build \
@@ -105,6 +105,7 @@ RUN source /assets/functions/00-container && \
     package remove .rspamd-build-deps && \
     package cleanup && \
     rm -rf /etc/logrotate.d/* \
+           /usr/src/* \
            /var/cache/package/*
 
 EXPOSE 11333 11334 11335

@@ -1,3 +1,9 @@
+## 1.7.3 2023-09-14 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Minimize image size and remove build directories
+
+
 ## 1.7.2 2023-08-03 <dave at tiredofit dot ca>
 
    ### Added
