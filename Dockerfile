@@ -23,11 +23,13 @@ RUN source /assets/functions/00-container && \
                 build-base \
                 cmake \
                 curl-dev \
+#                fasttext-dev \ ## TODO
                 fmt-dev \
                 git \
                 glib-dev \
                 icu-dev \
                 libsodium-dev \
+                libstemmer-dev \
                 luajit-dev \
                 openssl-dev \
                 pcre2-dev \
@@ -51,6 +53,7 @@ RUN source /assets/functions/00-container && \
                 libestr \
                 libfastjson \
                 libsodium \
+                libstemmer \
                 libuuid \
                 luajit \
                 pcre2 \
@@ -69,32 +72,48 @@ RUN source /assets/functions/00-container && \
                 configparser \
                 inotify \
                 && \
-   \
-   clone_git_repo ${RSPAMD_REPO_URL} ${RSPAMD_VERSION} && \
-   cmake \
-                  -B build \
-                  -G Ninja \
-                  -DCMAKE_BUILD_TYPE=MinSizeRel \
-                  -DCMAKE_INSTALL_PREFIX=/usr \
-                  -DCONFDIR=/etc/rspamd \
-                  -DRUNDIR=/run/rspamd \
-                  -DRSPAMD_USER=rspamd \
-                  -DRSPAMD_GROUP=rspamd \
-                  -DENABLE_REDIRECTOR=ON \
-                  -DENABLE_PCRE2=ON \
-                  -DENABLE_HYPERSCAN=ON \
-                  -DENABLE_LUAJIT=ON \
-                  #-DNO_SHARED=OFF \
-                  -DSYSTEM_FMT=ON \
-                  -DSYSTEM_XXHASH=ON \
-                  -DSYSTEM_ZSTD=ON \
-                  -DCMAKE_HOST_SYSTEM_NAME=Linux \
-                  . \
-                  && \
+    \
+    clone_git_repo "${RSPAMD_REPO_URL}" "${RSPAMD_VERSION}" && \
+    ## Start 3.7.1
+    sed -i \
+                -e "s|cmakedefine BACKWARD_ENABLE     1|cmakedefine BACKWARD_ENABLE     0|g" \
+            config.h.in && \
+    \
+    sed -i \
+                -e "/ADD_SUBDIRECTORY(.*backward-cpp/d" \
+                -e "/ADD_SUBDIRECTORY(.*snowball)/d" \
+                -e "/snowball\/include/d" \
+            CMakeLists.txt && \
+    \
+    sed -i \
+                -e "/ADD_BACKWARD/d" \
+            src/CMakeLists.txt src/rspamadm/CMakeLists.txt && \
+    sed -i \
+                -e "/#if BACKWARD_HAS_DW == 1/a#include <dlfcn.h>" \
+            contrib/backward-cpp/backward.hpp && \
+    \
+    cmake \
+        -B build \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE=MinSizeRel \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCONFDIR=/etc/rspamd \
+        -DRUNDIR=/run/rspamd \
+        -DRSPAMD_USER=rspamd \
+        -DRSPAMD_GROUP=rspamd \
+        #-DENABLE_FASTTEXT=ON \ ## TODO
+        -DENABLE_PCRE2=ON \
+        -DENABLE_HYPERSCAN=ON \
+        -DENABLE_LUAJIT=ON \
+        -DENABLE_URL_INCLUDE=ON \
+        -DSYSTEM_FMT=ON \
+        -DSYSTEM_XXHASH=ON \
+        -DSYSTEM_ZSTD=ON \
+        -DCMAKE_HOST_SYSTEM_NAME=Linux \
+        . \
+        && \
     cmake --build build --target all && \
     cmake --build build --target install && \
-    #make -C /usr/src/rspamd/build -j$(nproc) all && \
-    #make -C /usr/src/rspamd/build -j$(nproc) install && \
     mkdir -p /run/rspamd && \
     mkdir -p /assets/rspamd && \
     mkdir -p /etc/rspamd/local.d && \

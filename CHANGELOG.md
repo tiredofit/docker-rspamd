@@ -1,3 +1,9 @@
+## 1.7.5 2023-10-10 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Bugfix for 1.7.4 removing "Backwards" compatbility
+
+
 ## 1.7.4 2023-10-08 <dave at tiredofit dot ca>
 
    ### Added
