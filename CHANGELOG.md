@@ -1,3 +1,9 @@
+## 1.7.6 2023-10-26 <dave at tiredofit dot ca>
+
+   ### Added
+      - Rspamd 3.7.2
+
+
 ## 1.7.5 2023-10-10 <dave at tiredofit dot ca>
 
    ### Changed

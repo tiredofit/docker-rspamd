@@ -6,7 +6,7 @@ LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ARG RSPAMD_VERSION
 
-ENV RSPAMD_VERSION=${RSPAMD_VERSION:-"3.7.1"} \
+ENV RSPAMD_VERSION=${RSPAMD_VERSION:-"3.7.2"} \
     RSPAMD_REPO_URL=https://github.com/rspamd/rspamd \
     CONTAINER_ENABLE_MESSAGING=FALSE \
     IMAGE_NAME="tiredofit/rspamd" \
@@ -74,24 +74,6 @@ RUN source /assets/functions/00-container && \
                 && \
     \
     clone_git_repo "${RSPAMD_REPO_URL}" "${RSPAMD_VERSION}" && \
-    ## Start 3.7.1
-    sed -i \
-                -e "s|cmakedefine BACKWARD_ENABLE     1|cmakedefine BACKWARD_ENABLE     0|g" \
-            config.h.in && \
-    \
-    sed -i \
-                -e "/ADD_SUBDIRECTORY(.*backward-cpp/d" \
-                -e "/ADD_SUBDIRECTORY(.*snowball)/d" \
-                -e "/snowball\/include/d" \
-            CMakeLists.txt && \
-    \
-    sed -i \
-                -e "/ADD_BACKWARD/d" \
-            src/CMakeLists.txt src/rspamadm/CMakeLists.txt && \
-    sed -i \
-                -e "/#if BACKWARD_HAS_DW == 1/a#include <dlfcn.h>" \
-            contrib/backward-cpp/backward.hpp && \
-    \
     cmake \
         -B build \
         -G Ninja \
@@ -102,6 +84,7 @@ RUN source /assets/functions/00-container && \
         -DRSPAMD_USER=rspamd \
         -DRSPAMD_GROUP=rspamd \
         #-DENABLE_FASTTEXT=ON \ ## TODO
+        -DENABLE_BACKWARD=OFF \
         -DENABLE_PCRE2=ON \
         -DENABLE_HYPERSCAN=ON \
         -DENABLE_LUAJIT=ON \
