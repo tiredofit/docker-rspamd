@@ -68,7 +68,7 @@ RUN source /assets/functions/00-container && \
                 zstd-libs \
                 && \
     \
-    pip3 install \
+    pip3 install --break-system-packages \
                 configparser \
                 inotify \
                 && \
