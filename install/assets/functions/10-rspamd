@@ -914,7 +914,7 @@ EOF
 
 symbols = {
     "HFILTER_HOSTNAME_UNKNOWN" {
-        score = 8.5;
+        score = 2.5;
     }
 }
 EOF
