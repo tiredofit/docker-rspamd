@@ -74,6 +74,11 @@ RUN source /assets/functions/00-container && \
                 && \
     \
     clone_git_repo "${RSPAMD_REPO_URL}" "${RSPAMD_VERSION}" && \
+    sed -i \
+            -e "/\contrib\/snowball\/include/d" \
+            -e "/ADD_SUBDIRECTORY(contrib/snowball)/d" \
+            CMakeLists.txt
+
     cmake \
         -B build \
         -G Ninja \
