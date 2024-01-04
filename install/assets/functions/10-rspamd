@@ -268,6 +268,7 @@ sign_local = ${DKIM_SIGN_LOCAL,,};
 sign_authenticated = ${DKIM_SIGN_AUTH,,};
 symbol = "DKIM_SIGNED";
 try_fallback = ${DKIM_TRY_FALLBACK,,};
+use_domain = \"${DKIM_USE_HEADER,,}\";
 use_esld = ${DKIM_USE_ESLD,,};
 use_redis = false;
 key_prefix = "DKIM_KEYS";
