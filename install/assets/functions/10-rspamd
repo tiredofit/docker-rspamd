@@ -322,7 +322,7 @@ configure_greylist() {
 	if [ "${SETUP_TYPE,,}" = "auto" ]; then
 	    print_notice "Configuring Greylist"
 		cat <<EOF > /etc/rspamd/local.d/greylist.conf
-## Custom Generated Redis History Configuration! Do not edit, instead set ENV Vars
+## Custom Generated Greylist Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 enabled = ${ENABLE_GREYLIST,,};
@@ -493,7 +493,7 @@ configure_neural() {
 enabled = ${ENABLE_NEURAL,,};
 
 train {
-  max_train = ${NEURAL_MAX_TRAIN}; # Number ham/spam samples needed to start train
+  max_trains = ${NEURAL_MAX_TRAIN}; # Number ham/spam samples needed to start train
   max_usages = ${NEURAL_MAX_USAGES}; # Number of learn iterations while ANN data is valid was 20
   learning_rate = ${NEURAL_LEARNING_RATE}; # Rate of learning
   max_iterations = ${NEURAL_MAX_ITERATIONS}; # Maximum iterations of learning (better preciseness but also lower speed of learning)
