@@ -672,7 +672,7 @@ MX_IMPLICIT {
 }
 VIRUS_FOUND {
   expression = "CLAM_VIRUS";
-  score = 2000;
+  score = 2000.0;
 }
 
 SPF_FAIL_NO_DKIM {
