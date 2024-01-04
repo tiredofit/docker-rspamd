@@ -23,13 +23,15 @@ RUN source /assets/functions/00-container && \
                 build-base \
                 cmake \
                 curl-dev \
-#                fasttext-dev \ ## TODO
+                elfutils-dev \
+                fasttext-dev \
                 fmt-dev \
                 git \
                 glib-dev \
                 icu-dev \
                 libsodium-dev \
                 libstemmer-dev \
+                libunwind-dev \
                 luajit-dev \
                 openssl-dev \
                 pcre2-dev \
@@ -46,6 +48,7 @@ RUN source /assets/functions/00-container && \
                 && \
     \
     package install .rspamd-run-deps \
+                fasttext-libs \
                 fmt \
                 glib \
                 icu \
@@ -54,6 +57,7 @@ RUN source /assets/functions/00-container && \
                 libfastjson \
                 libsodium \
                 libstemmer \
+                libunwind \
                 libuuid \
                 luajit \
                 pcre2 \
@@ -75,10 +79,10 @@ RUN source /assets/functions/00-container && \
     \
     clone_git_repo "${RSPAMD_REPO_URL}" "${RSPAMD_VERSION}" && \
     sed -i \
-            -e "/\contrib\/snowball\/include/d" \
-            -e "/ADD_SUBDIRECTORY(contrib/snowball)/d" \
-            CMakeLists.txt
-
+            -e "\,contrib/snowball/include,d" \
+            -e "\,ADD_SUBDIRECTORY(contrib/snowball),d" \
+            CMakeLists.txt && \
+    \
     cmake \
         -B build \
         -G Ninja \
@@ -88,7 +92,7 @@ RUN source /assets/functions/00-container && \
         -DRUNDIR=/run/rspamd \
         -DRSPAMD_USER=rspamd \
         -DRSPAMD_GROUP=rspamd \
-        #-DENABLE_FASTTEXT=ON \ ## TODO
+        -DENABLE_FASTTEXT=ON \
         -DENABLE_BACKWARD=OFF \
         -DENABLE_PCRE2=ON \
         -DENABLE_HYPERSCAN=ON \
