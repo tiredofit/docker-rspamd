@@ -295,7 +295,6 @@ sign_local = ${ARC_SIGN_LOCAL,,};
 symbol = "ARC_SIGNED";
 try_fallback = ${ARC_TRY_FALLBACK,,};
 use_domain = "${ARC_USE_DOMAIN,,}";
-use_domain_sign_inbound = "${ARC_USE_DOMAIN_SIGN_INBOUND,,}";
 use_esld = ${ARC_USE_ESLD,,};
 use_redis = false;
 ${dkim_domains}
