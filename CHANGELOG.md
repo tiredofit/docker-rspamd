@@ -1,3 +1,10 @@
+## 1.7.12 2024-01-04 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Enable Fasttext
+      - Modify some rules back to default settings
+
+
 ## 1.7.11 2023-12-15 <dave at tiredofit dot ca>
 
    ### Added
