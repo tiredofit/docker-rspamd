@@ -259,7 +259,7 @@ EOF
 ## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 path = ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key;
-selector = ${DKIM_SELECTOR};
+selector = "${DKIM_SELECTOR}";
 allow_envfrom_empty = ${DKIM_ALLOW_ENVFROM_EMPTY,,};
 allow_hdrfrom_mismatch = ${DKIM_ALLOW_HDRFROM_MISMATCH,,};
 allow_hdrfrom_multiple = ${DKIM_ALLOW_HDRFROM_MULTIPLE,,};
@@ -268,7 +268,7 @@ sign_local = ${DKIM_SIGN_LOCAL,,};
 sign_authenticated = ${DKIM_SIGN_AUTH,,};
 symbol = "DKIM_SIGNED";
 try_fallback = ${DKIM_TRY_FALLBACK,,};
-use_domain = \"${DKIM_USE_HEADER,,}\";
+use_domain = "${DKIM_USE_HEADER,,}";
 use_esld = ${DKIM_USE_ESLD,,};
 use_redis = false;
 key_prefix = "DKIM_KEYS";

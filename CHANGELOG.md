@@ -1,3 +1,9 @@
+## 1.7.13 2024-01-08 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Fix issue with header not being read when signing DKIM properly
+
+
 ## 1.7.12 2024-01-04 <dave at tiredofit dot ca>
 
    ### Changed
