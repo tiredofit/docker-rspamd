@@ -224,36 +224,33 @@ configure_dkim() {
    		    	chmod 440 "${RSPAMD_DATA_LOCATION}"/dkim/*
    		    fi
 
-          NUM=$(printenv | sort | grep -c '^DKIM.*_DOMAIN')
-          for (( i = 1; i <= NUM; i++ ))
-          do
+            NUM=$(printenv | sort | grep -c '^DKIM.*_DOMAIN')
+            for (( i = 1; i <= NUM; i++ )); do
+                dkim_domain=DKIM${i}_DOMAIN
+                dkim_selector=DKIM${i}_SELECTOR
 
-            dkim_domain=DKIM${i}_DOMAIN
-            dkim_selector=DKIM${i}_SELECTOR
+                if [ "${!dkim_domain}" != "" ] ; then
 
-            if [ "${!dkim_domain}" != "" ] ; then
-
-              if [ ! -f "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key ] ; then
-                sudo -u rspamd rspamadm dkim_keygen -b "${DKIM_KEY_SIZE}" -s "${!dkim_selector}" -k "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key > "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
-                echo "Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
-                sed '1 s|^|local key = [[|' "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' > "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".redis
-                echo "redis.call('HMSET', 'DKIM_KEYS', '${!dkim_selector}.${!dkim_domain}', key)" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".redis
-                print_notice "***"
-                print_notice "DKIM: Key generated for '${!dkim_domain}' with selector '${!dkim_selector}' - You must add this entry to your Nameserver to complete the step"
-                cat "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
-                print_notice "It can also be found at '${RSPAMD_DATA_LOCATION}/dkim/${!dkim_domain}-${!dkim_selector}.dns.txt'"
-                print_notice "***"
-                chmod 440 "${RSPAMD_DATA_LOCATION}"/dkim/*
-              fi
-              dkim_domains=$(echo "${dkim_domains}" ; cat<<EOF
+                  if [ ! -f "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key ] ; then
+                    sudo -u rspamd rspamadm dkim_keygen -b "${DKIM_KEY_SIZE}" -s "${!dkim_selector}" -k "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key > "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
+                    echo "Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
+                    sed '1 s|^|local key = [[|' "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".key | sed 's|-----END PRIVATE KEY-----|-----END PRIVATE KEY-----]]|g' > "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".redis
+                    echo "redis.call('HMSET', 'DKIM_KEYS', '${!dkim_selector}.${!dkim_domain}', key)" >> "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".redis
+                    print_notice "***"
+                    print_notice "DKIM: Key generated for '${!dkim_domain}' with selector '${!dkim_selector}' - You must add this entry to your Nameserver to complete the step"
+                    cat "${RSPAMD_DATA_LOCATION}"/dkim/"${!dkim_domain}"-"${!dkim_selector}".dns.txt
+                    print_notice "It can also be found at '${RSPAMD_DATA_LOCATION}/dkim/${!dkim_domain}-${!dkim_selector}.dns.txt'"
+                    print_notice "***"
+                    chmod 440 "${RSPAMD_DATA_LOCATION}"/dkim/*
+                  fi
+                  dkim_domains=$(echo "${dkim_domains}" ; cat<<EOF
 domain { ${!dkim_domain} { path = "${RSPAMD_DATA_LOCATION}/dkim/${!dkim_domain}-${!dkim_selector}.key"; selector = "${!dkim_selector}"; }}
 EOF
               )
-            fi
-          done
+                fi
+            done
 
-
-			cat <<EOF > /etc/rspamd/local.d/dkim_signing.conf
+ 	    	cat <<EOF > /etc/rspamd/local.d/dkim_signing.conf
 ## Custom Generated DKIM Configuration! Do not edit, instead set ENV Vars
 ## If you want to use your own configuration files set SETUP_TYPE=MANUAL when starting container
 ## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
@@ -284,7 +281,7 @@ EOF
 ## Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
 
 path = ${RSPAMD_DATA_LOCATION}/dkim/${DKIM_SELECTOR}.key;
-selector = ${DKIM_SELECTOR};
+selector = "${DKIM_SELECTOR}";
 allow_envfrom_empty = ${ARC_ALLOW_ENVFROM_EMPTY,,};
 allow_hdrfrom_mismatch = ${ARC_ALLOW_HDRFROM_MISMATCH,,};
 allow_hdrfrom_multiple = ${ARC_ALLOW_HDRFROM_MULTIPLE,,};

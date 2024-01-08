@@ -1,3 +1,9 @@
+## 1.7.14 2024-01-08 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Quote ARC selector
+
+
 ## 1.7.13 2024-01-08 <dave at tiredofit dot ca>
 
    ### Changed
