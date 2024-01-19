@@ -1,3 +1,9 @@
+## 1.7.15 2024-01-19 <lcx@github>
+
+   ### Added
+      - Add subject regex blacklist support
+
+
 ## 1.7.14 2024-01-08 <dave at tiredofit dot ca>
 
    ### Changed
