@@ -1106,6 +1106,14 @@ WHITELIST_SENDER_DOMAIN {
   score = -10.0
 }
 
+SUBJECT_BLACKLISTED {
+  type = "header";
+  header = "Subject";
+  map = "${RSPAMD_DATA_LOCATION}/maps.d/global_subject_blacklist.map";
+  regexp = true;
+  action = "reject"; # Prefilter mode
+  description = "Blacklist map for SUBJECT_BLACKLISTED";
+}
 
 EOF
 
