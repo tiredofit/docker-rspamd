@@ -1,3 +1,9 @@
+## 1.7.16 2024-01-20 <dave at tiredofit dot ca>
+
+   ### Added
+      - Rspamd 3.8.0
+
+
 ## 1.7.15 2024-01-19 <lcx@github>
 
    ### Added
