@@ -1,3 +1,9 @@
+## 1.7.19 2024-02-25 <dave at tiredofit dot ca>
+
+   ### Added
+      - Rspsamd 3.8.3
+
+
 ## 1.7.18 2024-02-20 <dave at tiredofit dot ca>
 
    ### Changed
