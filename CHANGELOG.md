@@ -1,3 +1,9 @@
+## 1.7.22 2024-06-14 <waja@github>
+
+   ### Added
+      - Add defaults for OLETOOLS_PORT and OLETOOLS_HOST values since ENABLE_OLETOOLS=TRUE
+
+
 ## 1.7.21 2024-05-22 <dave at tiredofit dot ca>
 
    ### Added
