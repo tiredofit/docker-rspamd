@@ -96,7 +96,184 @@ Be sure to view the following repositories to understand all the customizable op
 | ------------------------------------------------------ | -------------------------------------- |
 | [OS Base](https://github.com/tiredofit/docker-alpine/) | Customized Image based on Alpine Linux |
 
+#### Rspamd Configuration
+
+| Parameter                           | Description | Default                              |
+| ----------------------------------- | ----------- | ------------------------------------ |
+| `ANTIVIRUS_ACTION`                  |             | `reject`                             |
+| `ANTIVIRUS_ATTACHMENTS_ONLY`        |             | `TRUE`                               |
+| `ANTIVIRUS_LOG_CLEAN`               |             | `TRUE`                               |
+| `ANTIVIRUS_MAX_SIZE`                |             |                                      |
+| `ANTIVIRUS_TYPE`                    |             | `clamav`                             |
+| `ARC_ALLOW_ENVFROM_EMPTY`           |             | `TRUE`                               |
+| `ARC_ALLOW_HDRFROM_MISMATCH`        |             | `TRUE`                               |
+| `ARC_ALLOW_HDRFROM_MULTIPLE`        |             | `FALSE`                              |
+| `ARC_ALLOW_USERNAME_MISMATCH`       |             | `FALSE`                              |
+| `ARC_AUTH_ONLY`                     |             | `TRUE`                               |
+| `ARC_SIGN_INBOUND`                  |             | `TRUE`                               |
+| `ARC_SIGN_LOCAL`                    |             | `FALSE`                              |
+| `ARC_TRY_FALLBACK`                  |             | `TRUE`                               |
+| `ARC_USE_DOMAIN`                    |             | `recipient`                          |
+| `ARC_USE_ESLD`                      |             | `TRUE`                               |
+| `BAYESIAN_AUTOLEARN`                |             | `TRUE`                               |
+| `BAYESIAN_AUTOLEARN_CHECK_BALANCE`  |             | `TRUE`                               |
+| `BAYESIAN_AUTOLEARN_HAM_THRESHOLD`  |             | `-0.5`                               |
+| `BAYESIAN_AUTOLEARN_MIN_BALANCE`    |             | `0.9`                                |
+| `BAYESIAN_AUTOLEARN_SPAM_THRESHOLD` |             | `6.0`                                |
+| `BAYESIAN_EXPIRE`                   |             |                                      |
+| `BAYESIAN_MIN_LEARNS`               |             |                                      |
+| `BAYESIAN_NEW_SCHEMA`               |             | `TRUE`                               |
+| `BAYESIAN_SIGNATURES`               |             | `TRUE`                               |
+| `BAYESIAN_STORE_STOKENS`            |             | `TRUE`                               |
+| `CLAMAV_HOST`                       |             | `clamav`                             |
+| `CLAMAV_PORT`                       |             | `3310`                               |
+| `CONFIG_PATH`                       |             | `/config/`                           |
+| `CONTROLLER_COUNT`                  |             |                                      |
+| `CONTROLLER_LISTEN_IP`              |             | `*v4`                                |
+| `CONTROLLER_LISTEN_PORT`            |             | `11334`                              |
+| `CONTROLLER_HOST`                   |             | `127.0.0.1`                          |
+| `CONTROLLER_PORT`                   |             | `11334`                              |
+| `CONTROLLER_PASS`                   |             | `admin`                              |
+| `CONTROLLER_SECURE_IPS`             |             | `127.0.0.1,172.16.0.0/12`            |
+| `DKIM_ALLOW_ENVFROM_EMPTY`          |             | `TRUE`                               |
+| `DKIM_ALLOW_HDRFROM_MISMATCH`       |             | `FALSE`                              |
+| `DKIM_ALLOW_HDRFROM_MULTIPLE`       |             | `FALSE`                              |
+| `DKIM_ALLOW_USERNAME_MISMATCH`      |             | `FALSE`                              |
+| `DKIM_SIGN_AUTH`                    |             | `TRUE`                               |
+| `DKIM_KEY_SIZE`                     |             | `2048`                               |
+| `DKIM_SIGN_LOCAL`                   |             | `TRUE`                               |
+| `DKIM_TRY_FALLBACK`                 |             | `TRUE`                               |
+| `DKIM_USE_ESLD`                     |             | `TRUE`                               |
+| `DKIM_USE_DOMAIN`                   |             | `header`                             |
+| `DKIM_SELECTOR`                     |             | `mail`                               |
+| `DMARC_DOMAIN`                      |             | `example.com`                        |
+| `DMARC_EMAIL`                       |             | `postmaster@example.com`             |
+| `DMARC_ENABLE_REPORTING`            |             | `TRUE`                               |
+| `DMARC_FROM_NAME`                   |             | `Mailserver`                         |
+| `DMARC_ORG_NAME`                    |             | `Example Organization`               |
+| `DMARC_SEND_REPORTS`                |             | `FALSE`                              |
+| `DMARC_SMTP_HELO`                   |             | `rspamd`                             |
+| `DMARC_SMTP_HOST`                   |             | `postfix-relay`                      |
+| `DMARC_SMTP_PORT`                   |             | `25`                                 |
+| `DMARC_SMTP_RETRIES`                |             | `2`                                  |
+| `ENABLE_ANTIVIRUS`                  |             | `TRUE`                               |
+| `ENABLE_ARC`                        |             | `TRUE`                               |
+| `ENABLE_ASN`                        |             | `TRUE`                               |
+| `ENABLE_CONTROLLER`                 |             | `TRUE`                               |
+| `ENABLE_DKIM`                       |             | `TRUE`                               |
+| `ENABLE_DMARC`                      |             | `TRUE`                               |
+| `ENABLE_GREYLIST`                   |             | `FALSE`                              |
+| `ENABLE_HISTORY`                    |             | `TRUE`                               |
+| `ENABLE_MILTER`                     |             | `TRUE`                               |
+| `ENABLE_MX_CHECK`                   |             | `TRUE`                               |
+| `ENABLE_NEURAL`                     |             | `TRUE`                               |
+| `ENABLE_OLETOOLS`                   |             | `TRUE`                               |
+| `ENABLE_PHISHING_CHECK`             |             | `TRUE`                               |
+| `ENABLE_RATELIMITING`               |             | `TRUE`                               |
+| `ENABLE_REPUTATION`                 |             | `TRUE`                               |
+| `ENABLE_SPAMTRAP`                   |             | `TRUE`                               |
+| `ENABLE_SPF`                        |             | `TRUE`                               |
+| `ENABLE_URL_REPUTATION`             |             | `TRUE`                               |
+| `ENABLE_URL_TAGS`                   |             | `TRUE`                               |
+| `HISTORY_COMPRESS`                  |             | `TRUE`                               |
+| `HISTORY_ROWS_LIMIT`                |             | `200`                                |
+| `HISTORY_SUBJECT_PRIVACY`           |             | `FALSE`                              |
+| `LOCAL_IPS`                         |             | `127.0.0.0/8, 172.16.0.0/12`         |
+| `LOG_CONSOLE_COLORIZE`              |             | `TRUE`                               |
+| `LOG_FILE`                          |             | `rspamd.log`                         |
+| `LOG_LEVEL`                         |             | `silent`                             |
+| `LOG_LOCATION`                      |             | `/logs/`                             |
+| `LOG_SEVERITY`                      |             | `TRUE`                               |
+| `LOG_TYPE`                          |             | `FILE`                               |
+| `LOG_URLS`                          |             | `FALSE`                              |
+| `LOG_USEC`                          |             | `FALSE`                              |
+| `MAP_WATCH_INTERVAL`                |             | `30s`                                |
+| `METRICS_ADD_HEADER`                |             | `6`                                  |
+| `METRICS_GREYLIST`                  |             | `4`                                  |
+| `METRICS_REJECT`                    |             | `15`                                 |
+| `METRICS_SPOOF_REPLYTO`             |             | `6.0`                                |
+| `METRICS_REWRITE_SUBJECT`           |             | `12`                                 |
+| `MILTER_EXTENDED_SPAM_HEADERS`      |             | `FALSE`                              |
+| `MODE`                              |             | `AIO`                                |
+| `MX_CHECK_EXPIRE`                   |             | `86400`                              |
+| `MX_CHECK_TIMEOUT`                  |             | `8.0`                                |
+| `NAMESERVER`                        |             | `127.0.0.1`                          |
+| `NAMESERVER_TIMEOUT`                |             | `5s`                                 |
+| `NEURAL_ANN_EXPIRE`                 |             | `2w`                                 |
+| `NEURAL_LEARNING_RATE`              |             | `0.01`                               |
+| `NEURAL_MAX_ITERATIONS`             |             | `25`                                 |
+| `NEURAL_MAX_TRAIN`                  |             | `1k`                                 |
+| `NEURAL_MAX_USAGES`                 |             | `60`                                 |
+| `OLETOOLS_SCAN_MIME`                |             | `TRUE`                               |
+| `OLETOOLS_BLOCK_ALL_MACROS`         |             | `FALSE`                              |
+| `PHISHING_ENABLE_OPENPHISH`         |             | `TRUE`                               |
+| `PHISHING_ENABLE_PHISHTANK`         |             | `TRUE`                               |
+| `PHISHING_OPENPHISH_FEED`           |             | `https://www.openphish.com/feed.txt` |
+| `PHISHING_OPENPHISH_PREMIUM`        |             | `FALSE`                              |
+| `RATELIMIT_FROM_BURST`              |             | `50`                                 |
+| `RATELIMIT_FROM_RATE`               |             | `1 / 1min`                           |
+| `RATELIMIT_RCPT_BURST`              |             | `50`                                 |
+| `RATELIMIT_RCPT_RATE`               |             | `1 / 1min`                           |
+| `REDIS_DB`                          |             | `7`                                  |
+| `REDIS_HOST`                        |             | `rspamd-redis`                       |
+| `REDIS_PORT`                        |             | `6379`                               |
+| `REDIS_TIMEOUT`                     |             | `3s`                                 |
+| `REWRITE_SUBJECT`                   |             | `[SPAM] %s`                          |
+| `RSPAMD_DATA_LOCATION`              |             | `/data/rspamd`                       |
+| `SETUP_TYPE`                        |             | `AUTO`                               |
+| `SPAMTRAP_ACTION`                   |             | `no action`                          |
+| `SPAMTRAP_LEARN_FUZZY`              |             | `TRUE`                               |
+| `SPAMTRAP_LEARN_SPAM`               |             | `TRUE`                               |
+| `SPAMTRAP_SCORE`                    |             | `1.0`                                |
+| `SKIP_CLAMAV_HOST_CHECK`            |             | `FALSE`                              |
+| `SKIP_NAMESERVER_HOST_CHECK`        |             | `FALSE`                              |
+| `SKIP_OLEFY_HOST_CHECK`             |             | `FALSE`                              |
+| `SKIP_REDIS_HOST_CHECK`             |             | `FALSE`                              |
+| `WHITELIST_ANTIVIRUS`               |             | `antivirus.wl`                       |
+| `WORKER_FUZZY_LISTEN_IP`            |             | `*v4`                                |
+| `WORKER_FUZZY_LISTEN_PORT`          |             | `11335`                              |
+| `WORKER_FUZZY_ALLOW_UPDATE_IPS`     |             | `127.0.0.1`                          |
+| `WORKER_FUZZY_COUNT`                |             |                                      |
+| `WORKER_FUZZY_EXPIRE`               |             | `90d`                                |
+| `WORKER_FUZZY_SYNC`                 |             | `1min`                               |
+| `WORKER_LISTEN_IP`                  |             | `*v4`                                |
+| `WORKER_LISTEN_PORT`                |             | `11333`                              |
+| `WORKER_COUNT`                      |             | `1`                                  |
+| `WORKER_TASK_TIMEOUT`               |             | `12s`                                |
+| `WORKER_PROXY_LISTEN_IP`            |             | `*v4`                                |
+| `WORKER_PROXY_LISTEN_PORT`          |             | `11332`                              |
+| `WORKER_PROXY_SPAM_HEADER`          |             | `X-Spam-Status`                      |
+| `WORKER_PROXY_TIMEOUT`              |             | `120s`                               |
+| `WORKER_PROXY_REJECT_MESSAGE`       |             | `Spam message rejected`              |
+| `WORKER_PROXY_COUNT`                |             | `1`                                  |
+| `WORKER_PROXY_MAX_RETRY`            |             | `5`                                  |
+| `WORKER_PROXY_REJECT_DISCARD`       |             | `FALSE`                              |
+| `WORKER_PROXY_REJECT_QUARANTINE`    |             | `FALSE`                              |
+| `DB_HOST`                           |             |                                      |
+| `DB_PORT`                           |             |                                      |
+
+#### Spamlearn configuration
+
+| Parameter                           | Description | Default                      |
+| ----------------------------------- | ----------- | ---------------------------- |
+| `ENABLE_SPAMLEARN_INOTIFY`          |             | `TRUE`                       |
+| `LOG_LEVEL_SPAMLEARN`               |             | `INFO`                       |
+| `LOG_SPAMLEARN_LOCATION`            |             | `/logs/spamlearn/`           |
+| `LOG_SPAMLEARN_FILE`                |             | `spamlearn.log`              |
+| `LOG_SPAMLEARN_TYPE`                |             | `FILE`                       |
+| `SPAMLEARN_CONFIG_FILE`             |             | `/etc/inotify/spamlearn.cfg` |
+| `SPAMLEARN_DELETE_AFTER_PROCESSING` |             | `TRUE`                       |
+| `SPAMLEARN_HAM_LOCATION`            |             | `/data/spamlearn/ham`        |
+| `SPAMLEARN_SPAM_LOCATION`           |             | `/data/spamlearn/spam`       |
+| `` | | `` |
+| `` | | `` |
+
 ### Networking
+
+| Port   | Description             |
+| ------ | ----------------------- |
+| `11333` | Rspamd Port            |
+| `11334` | Rspamd Controller Port |
 
 ## Maintenance
 ### Shell Access
