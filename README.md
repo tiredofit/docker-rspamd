@@ -204,6 +204,8 @@ Be sure to view the following repositories to understand all the customizable op
 | `NEURAL_MAX_ITERATIONS`             |             | `25`                                 |
 | `NEURAL_MAX_TRAIN`                  |             | `1k`                                 |
 | `NEURAL_MAX_USAGES`                 |             | `60`                                 |
+| `OLETOOLS_HOST`                     |             |  `rspamd-olefy`                      |
+| `OLETOOLS_PORT`                     |             |  `1005`                              |
 | `OLETOOLS_SCAN_MIME`                |             | `TRUE`                               |
 | `OLETOOLS_BLOCK_ALL_MACROS`         |             | `FALSE`                              |
 | `PHISHING_ENABLE_OPENPHISH`         |             | `TRUE`                               |
