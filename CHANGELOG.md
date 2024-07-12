@@ -1,3 +1,9 @@
+## 1.7.24 2024-07-12 <dave at tiredofit dot ca>
+
+   ### Changed
+      - Switch to included fmt
+
+
 ## 1.7.23 2024-07-12 <dave at tiredofit dot ca>
 
    ### Added

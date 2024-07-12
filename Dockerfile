@@ -25,10 +25,11 @@ RUN source /assets/functions/00-container && \
                 curl-dev \
                 elfutils-dev \
                 fasttext-dev \
-                fmt-dev \
+                #fmt-dev \
                 git \
                 glib-dev \
                 icu-dev \
+                libarchive-dev \
                 libsodium-dev \
                 libstemmer-dev \
                 libunwind-dev \
@@ -49,10 +50,11 @@ RUN source /assets/functions/00-container && \
     \
     package install .rspamd-run-deps \
                 fasttext-libs \
-                fmt \
+                #fmt \
                 glib \
                 icu \
                 icu-data-full \
+                libarchive \
                 libestr \
                 libfastjson \
                 libsodium \
@@ -98,7 +100,7 @@ RUN source /assets/functions/00-container && \
         -DENABLE_HYPERSCAN=ON \
         -DENABLE_LUAJIT=ON \
         -DENABLE_URL_INCLUDE=ON \
-        -DSYSTEM_FMT=ON \
+        -DSYSTEM_FMT=OFF \
         -DSYSTEM_XXHASH=ON \
         -DSYSTEM_ZSTD=ON \
         -DCMAKE_HOST_SYSTEM_NAME=Linux \
