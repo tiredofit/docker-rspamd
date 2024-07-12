@@ -1,3 +1,9 @@
+## 1.7.23 2024-07-12 <dave at tiredofit dot ca>
+
+   ### Added
+      - Rspamd 3.9.0
+
+
 ## 1.7.22 2024-06-14 <waja@github>
 
    ### Added
