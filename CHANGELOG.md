@@ -1,3 +1,9 @@
+## 1.7.26 2024-09-30 <dave at tiredofit dot ca>
+
+   ### Added
+      - RSpamd 3.10.0
+
+
 ## 1.7.25 2024-07-31 <dave at tiredofit dot ca>
 
    ### Added
