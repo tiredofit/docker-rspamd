@@ -1,3 +1,12 @@
+## 1.7.27 2024-09-30 <dave at tiredofit dot ca>
+
+   ### Added
+      - Pin to tiredofit/alpine:3.20-7.10.4
+
+   ### Changed
+      - Fix for dkim generation - Credit to gotos@github #16
+
+
 ## 1.7.26 2024-09-30 <dave at tiredofit dot ca>
 
    ### Added
