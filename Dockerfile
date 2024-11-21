@@ -1,7 +1,7 @@
 ARG DISTRO="alpine"
 ARG DISTRO_VARIANT="3.20"
 
-FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}-7.10.22
+FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}-7.10.20
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ARG RSPAMD_VERSION
