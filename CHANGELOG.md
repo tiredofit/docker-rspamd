@@ -1,3 +1,10 @@
+## 1.7.30 2024-11-21 <dave at tiredofit dot ca>
+
+   ### Added
+      - Pin to tiredofit/alpine:3.20-7.10.22
+      - Add custom_scripts support to execute bash scripts from /assets/custom-scripts on container startup
+
+
 ## 1.7.29 2024-10-21 <dave at tiredofit dot ca>
 
    ### Added

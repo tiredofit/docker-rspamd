@@ -35,5 +35,6 @@ else
     service_stop 10-rspamd
 fi
 
+custom_scripts /assets/custom-scripts
 
 liftoff
