@@ -1,3 +1,10 @@
+## 1.7.32 2024-12-16 <dave at tiredofit dot ca>
+
+   ### Added
+      - Pin to tiredofit/alpine:3.21-7.10.27
+      - RSpamd 3.11.0
+
+
 ## 1.7.31 2024-11-21 <dave at tiredofit dot ca>
 
    ### Added

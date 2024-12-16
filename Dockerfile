@@ -1,12 +1,12 @@
 ARG DISTRO="alpine"
-ARG DISTRO_VARIANT="3.20"
+ARG DISTRO_VARIANT="3.21"
 
-FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}-7.10.20
+FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}-7.10.27
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ARG RSPAMD_VERSION
 
-ENV RSPAMD_VERSION=${RSPAMD_VERSION:-"3.10.2"} \
+ENV RSPAMD_VERSION=${RSPAMD_VERSION:-"3.11.0"} \
     RSPAMD_REPO_URL=https://github.com/rspamd/rspamd \
     CONTAINER_ENABLE_MESSAGING=FALSE \
     IMAGE_NAME="tiredofit/rspamd" \
