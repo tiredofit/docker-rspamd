@@ -1,3 +1,10 @@
+## 1.7.33 2025-03-08 <dave at tiredofit dot ca>
+
+   ### Added
+      - Rspamd 3.11.1
+      - tiredofit/alpine:7.10.29
+
+
 ## 1.7.32 2024-12-16 <dave at tiredofit dot ca>
 
    ### Added
